@@ -63,7 +63,7 @@ function layers(){
   if(level>8)return;
   const row=document.createElement('div');row.className='layer';row.style.paddingLeft=Math.min(level,5)*10+'px';
   const left=document.createElement('span');left.style.cssText='display:flex;align-items:center;gap:5px;min-width:0;flex:1';
-  const children=obj.children.filter(o=>o.isMesh||o.isGroup);
+  const children=obj.children.filter(o=>o.isMesh||o.isGroup||o.isLine);
   const exp=document.createElement('button');exp.textContent=children.length?'▸':'·';exp.style.cssText='min-width:23px;min-height:26px;padding:0;background:transparent;border:0';left.append(exp);
   const label=document.createElement('span');label.textContent=obj.name|| (obj.isMesh?'Maillage':'Groupe');label.style.cssText='overflow:hidden;text-overflow:ellipsis;white-space:nowrap';left.append(label);
   const check=document.createElement('input');check.type='checkbox';check.checked=obj.visible;check.title='Afficher ou masquer';check.onchange=()=>{setDescendants(obj,check.checked);clearSelect();layers()};
@@ -75,18 +75,18 @@ function layers(){
  const addInto=(obj,level,target)=>{
   const wrap=document.createElement('div');target.append(wrap);
   const row=document.createElement('div');row.className='layer';row.style.paddingLeft=Math.min(level,5)*10+'px';
-  const children=obj.children.filter(o=>o.isMesh||o.isGroup);
+  const children=obj.children.filter(o=>o.isMesh||o.isGroup||o.isLine);
   const toggle=document.createElement('button');toggle.textContent=children.length?'▸':'·';toggle.style.cssText='min-width:22px;min-height:26px;padding:0;border:0;background:transparent';
   const name=document.createElement('span');name.textContent=obj.name|| (obj.isMesh?'Maillage':'Groupe');name.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
   const c=document.createElement('input');c.type='checkbox';c.checked=obj.visible;c.onchange=()=>{setDescendants(obj,c.checked);clearSelect();layers()};
   row.append(toggle,name,c);wrap.append(row);
   if(children.length&&level<8){const inside=document.createElement('div');inside.hidden=true;wrap.append(inside);let populated=false;toggle.onclick=()=>{if(!populated){for(const ch of children)addInto(ch,level+1,inside);populated=true}inside.hidden=!inside.hidden;toggle.textContent=inside.hidden?'▸':'▾'}}
  };
- for(const obj of model.children.filter(o=>o.isMesh||o.isGroup))addInto(obj,0,tree);
+ for(const obj of model.children.filter(o=>o.isMesh||o.isGroup||o.isLine))addInto(obj,0,tree);
  search.oninput=()=>{
   tree.replaceChildren();const q=search.value.trim().toLowerCase();
-  if(!q){for(const o of model.children.filter(o=>o.isMesh||o.isGroup))addInto(o,0,tree);return}
-  model.traverse(o=>{if((o.isMesh||o.isGroup)&&o!==model&&(o.name||'').toLowerCase().includes(q))addInto(o,0,tree)})
+  if(!q){for(const o of model.children.filter(o=>o.isMesh||o.isGroup||o.isLine))addInto(o,0,tree);return}
+  model.traverse(o=>{if((o.isMesh||o.isGroup||o.isLine)&&o!==model&&(o.name||'').toLowerCase().includes(q))addInto(o,0,tree)})
  };
 }
 
