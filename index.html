@@ -113,10 +113,10 @@ async function handleImport(f){
  if(!f)return;
  $('importDiagnostic').textContent='Fichier reçu : '+f.name+' · '+f.size+' octets · type iOS : '+(f.type||'inconnu');
  try{
-  if(/\\.ghx?$/i.test(f.name)||($('forceGh').checked&&/\\.txt$/i.test(f.name))){
+  if(/\.ghx?$/i.test(f.name)||($('forceGh').checked&&/\.txt$/i.test(f.name))){
    if(f.size>12e6)throw Error('GH/GHX supérieur à 12 Mo : fichier trop volumineux pour cette inspection mobile');
-   inspectGrasshopper(f,/\\.ghx$/i.test(f.name)?await f.text():null);
-  }else if(/\\.glb$/i.test(f.name)){
+   inspectGrasshopper(f,/\.ghx$/i.test(f.name)?await f.text():null);
+  }else if(/\.glb$/i.test(f.name)){
    if(f.size>150e6)throw Error('GLB supérieur à 150 Mo : optimiser la maquette pour iPhone');
    $('status').textContent='Chargement…';
    const bytes=await f.arrayBuffer();const sceneGLB=await new Promise((resolve,reject)=>new GLTFLoader().parse(bytes,'',g=>resolve(g.scene),reject));load(sceneGLB,false,f.name);$('ghPanel').hidden=true;$('importPanel').hidden=true;
@@ -134,7 +134,7 @@ $('zipFile').onchange=async e=>{
    await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';script.onload=resolve;script.onerror=()=>reject(Error('Impossible de charger le lecteur ZIP. Connexion internet requise pour ce premier chargement.'));document.head.append(script)});
   }
   const zip=await window.JSZip.loadAsync(archive);
-  const match=Object.values(zip.files).find(entry=>!entry.dir&&/\\.(gh|ghx|glb)$/i.test(entry.name));
+  const match=Object.values(zip.files).find(entry=>!entry.dir&&/\.(gh|ghx|glb)$/i.test(entry.name));
   if(!match)throw Error('Aucun GH, GHX ou GLB trouvé dans ce ZIP');
   const data=await match.async('uint8array');if(data.length>150e6)throw Error('Fichier décompressé trop volumineux');
   const file=new File([data],match.name.split('/').pop(),{type:'application/octet-stream'});
