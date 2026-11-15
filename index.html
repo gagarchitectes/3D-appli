@@ -759,13 +759,18 @@ function pyInspectImports(source){
 }
 function pyShowInspection(source,filename){
  const deps=pyInspectImports(source);
+ if(gagaR1Signature(source)){
+  $('pyState').textContent='GAGA R1 prêt';
+  pyOutput('SCRIPT RECONNU : GAGA V3D-04 R1'+(filename?'\\n'+filename:'')+'\\n',true);
+  pyOutput('Mode iPhone : adaptateur GAGA local. Le code Rhino/.NET original ne sera pas exécuté.\\n');
+  pyOutput('Appuie sur ▶ Exécuter pour construire les nodes et la 3D et ouvrir GH automatiquement.\\n');
+  return true;
+ }
  if(!deps.length){$('pyState').textContent='Prêt';return false}
- $('pyState').textContent='Rhino / GH détecté';
- pyOutput('INSPECTION DU SCRIPT'+(filename?' : '+filename:'')+'\n',true);
- pyOutput('Dépendances Rhino / Grasshopper détectées : '+deps.join(', ')+'\n\n');
- pyOutput('Ce script utilise des bibliothèques .NET ou Rhino non disponibles dans Pyodide sur iPhone.\n');
- pyOutput('Le code reste consultable et modifiable dans cet éditeur, mais il ne peut pas être exécuté ici.\n');
- pyOutput('Pour générer les géométries, exécute ce script dans Rhino 8 / Grasshopper sur ordinateur, puis importe les sorties GH/GHX ou GLB compatibles.\n');
+ $('pyState').textContent='Rhino / GH non pris en charge';
+ pyOutput('SCRIPT RHINO / GRASSHOPPER NON RECONNU'+(filename?' : '+filename:'')+'\\n',true);
+ pyOutput('Dépendances : '+deps.join(', ')+'\\n');
+ pyOutput('Cette version ne sait exécuter localement que l’adaptateur GAGA V3D-04 R1. Ce fichier ne sera pas envoyé à Pyodide.\\n');
  return true;
 }
 
@@ -980,15 +985,25 @@ function gagaR1Build(){
  gagaR1Runtime.root=root;
  return {root,nodes,links};
 }
+// L'adaptateur doit être initialisé avant tout clic, jamais évalué pendant l'import.
 const gagaR1DefaultPyRun=$('pyRun').onclick;
 $('pyRun').onclick=async()=>{
  const source=$('pyEditor').value;
- if(!gagaR1Signature(source)){return gagaR1DefaultPyRun()}
+ if(!gagaR1Signature(source)){
+  const deps=pyInspectImports(source);
+  if(deps.length){
+   pyShowInspection(source,$('pyFileName').textContent);
+   return;
+  }
+  return gagaR1DefaultPyRun();
+ }
  if(pyRunning)return;
  pyRunning=true;$('pyRun').disabled=true;
  try{
   // The original Rhino Python source is NOT executed: only the predefined R1
   // geometric adapter is executed, using validated constants and structures.
+  $('pyState').textContent='Génération GAGA R1…';
+  pyOutput('GAGA R1 : génération des volumes, nodes et toitures en cours…\\n',true);
   const result=gagaR1Build();
   load(result.root,false,'GAGA V3D-04 R1 · A + B');
   ghSelection.clear();ghNodes=result.nodes;ghLinks=result.links;
@@ -1001,7 +1016,7 @@ $('pyRun').onclick=async()=>{
   $('counts').textContent='350 commerces · A + B';
   $('notice').textContent='Adaptateur V3D-04 R1 : non-exécution du Python Rhino original · 3D et nodes liés · DWG/conformité non validés.';
   pyOutput('Adaptateur GAGA R1 exécuté localement. 350 volumes, toitures A/B, nodes associés. Aucun .gh natif créé.\n',true);
-  ghMessage('GAGA R1 : nodes liés à la 3D. Curseurs : glisser pour recalculer. Sélectionner un node puis Voir/Masquer/Isoler. Toitures OFF au départ.');
+  ghMessage('GAGA R1 : nodes liés à la 3D. Sélectionne un node, puis Voir/Masquer/Isoler. Les toitures sont masquées au départ.');
  }catch(error){
   $('pyState').textContent='Erreur adaptateur';pyOutput('GAGA R1 : '+String(error.message||error)+'\n',true);
  }finally{pyRunning=false;$('pyRun').disabled=false}
