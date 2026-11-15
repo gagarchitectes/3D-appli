@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1929"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GAGA 3D"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>GAGA 3D Viewer V1.5.5</title><style>
+<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1929"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GAGA 3D"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>GAGA 3D Viewer V1.6.0</title><style>
 :root{color-scheme:dark;--bg:#08131f;--glass:rgba(13,28,43,.85);--stroke:rgba(164,211,235,.18);--accent:#77d8f3;--muted:#92abbb}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#edf8ff;font:14px -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}body{overscroll-behavior:none}
 main{height:100dvh;width:100%;position:relative;display:flex;flex-direction:column;gap:0;padding:0;background:#08131f}
@@ -18,6 +18,15 @@ nav button.on{background:#286c8f;color:white;border-color:#60c8ed66}
 .label{top:calc(env(safe-area-inset-top) + 92px);left:17px;max-width:calc(100% - 90px);padding:8px 12px;border-radius:10px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(18px);font-size:10px;color:#c7e6f7;letter-spacing:.065em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tools{top:calc(env(safe-area-inset-top) + 89px);right:14px;display:grid;gap:9px}
 .tools button{width:45px;height:45px;min-height:45px;padding:0;border-radius:14px;background:var(--glass);border:1px solid var(--stroke);font-size:21px;box-shadow:0 5px 20px #0003;backdrop-filter:blur(18px)}
+.tools button.measuring{background:#d78a2d;border-color:#ffe5a6;color:#11212e}
+#measureHud{position:absolute;z-index:6;left:12px;right:70px;top:calc(env(safe-area-inset-top) + 89px);max-width:370px;padding:12px;border:1px solid #e8a640;border-radius:15px;background:#102b3ceF;color:#eaf6fa;box-shadow:0 5px 20px #0008;font-size:12px;line-height:1.5}
+#measureHud[hidden],#measureResult[hidden]{display:none}
+.measureHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.measureHead button{border:1px solid #668397;background:#24455b;color:white;border-radius:8px;min-width:32px;min-height:32px}
+#measureLength{display:block;font-size:20px;color:#ffc56a;margin-top:7px}
+#measureCoords{font-size:10px;color:#a9c6d9;overflow-wrap:anywhere}
+.measureActions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.measureActions button,.measureActions select{background:#25465b;color:white;border:1px solid #6d9ab3;border-radius:8px;padding:8px;min-height:38px;max-width:100%}
 .tools button:active,.views button.on{background:#226b8d}
 .views{right:14px;bottom:calc(env(safe-area-inset-bottom) + 132px);display:grid;grid-template-columns:repeat(3,35px);gap:2px;padding:5px;border:1px solid var(--stroke);border-radius:15px;background:var(--glass);box-shadow:0 6px 24px #0003;backdrop-filter:blur(18px)}
 .views button{min-height:31px;padding:1px;border-radius:7px;background:transparent;border:0;color:#d4e5ef;font-weight:700;font-size:9px}
@@ -69,7 +78,12 @@ input[type=range]{accent-color:#69caea;width:100%}
 footer{position:absolute;z-index:3;bottom:calc(env(safe-area-inset-bottom) + 13px);left:18px;right:18px;display:flex;justify-content:space-between;font-size:10px;color:#a3c0d0;pointer-events:none}
 #notice{display:none}
 @media (min-width:800px){.panel{left:16px;right:auto;top:160px;bottom:auto;width:350px;max-height:calc(100% - 190px);border-radius:21px;border-bottom:1px solid #4d7085;padding-bottom:20px}nav{left:50%;right:auto;transform:translateX(-50%);width:390px}.views{bottom:130px}.hint{bottom:120px}.info{left:50%;right:auto;transform:translateX(-50%);width:350px}.label{top:120px}.tools{top:120px}}
-</style></head><body><main><header><div><strong>GAGA <em>3D</em></strong> <small>V1.5.5</small><div><small>3D VIEWER · TOUCH EDITION</small></div></div><small id="status">● DÉMO</small></header><nav><button id="demo" class="on">Démo</button><button id="import">＋ Importer un fichier</button><button id="ghMode">⌘ GH</button><button id="fit">⌖ Cadrer</button></nav><div class="viewport" id="viewport"><div class="floating label" id="modelName">MARCHÉ YASSAMINE — DÉMO</div><div class="floating tools"><button id="layers">▤</button><button id="section">◫</button><button id="reset">↺</button></div><div class="floating views"><span></span><button data-view="top">TOP</button><span></span><button data-view="left">LEFT</button><button data-view="iso" class="on">3D</button><button data-view="right">RIGHT</button><span></span><button data-view="front">FACE</button></div><div class="floating hint">1 doigt : orbite · 2 doigts : zoom/pan</div><div class="panel" id="importPanel" hidden><div class="heading">IMPORT · FICHIERS<button class="close" data-close="importPanel">✕</button></div><p class="meta">Ouvrir un GH, GHX ou GLB depuis Fichiers. Si iOS grise ton GH, utilise le bouton ZIP de secours ci-dessous (compresse d’abord le GH dans Fichiers).</p><input id="file" type="file" aria-label="Choisir GH, GHX ou GLB"><button id="zipImport" type="button" style="width:100%;padding:13px;background:#245a73;border:1px solid #78c5eb;border-radius:12px;margin-bottom:9px">📦 Ouvrir un ZIP contenant le GH</button><input id="zipFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden><div id="dropZone" role="status" class="meta" style="border:1px dashed #6ba7c7;border-radius:11px;padding:12px;text-align:center">Ou glisse un fichier ici depuis Fichiers (iPad / ordinateur)</div><label class="layer"><span>Fichier renommé en .txt (le traiter comme .gh)</span><input type="checkbox" id="forceGh"></label><div class="meta" id="importDiagnostic" style="margin-top:12px">Sélecteur prêt. Sur iPhone : dans Fichiers, appui long sur le .gh → Compresser ; puis utilise « Ouvrir un ZIP contenant le GH ».</div><p class="meta" style="margin-top:12px">Lecture expérimentale des polylignes enregistrées dans les fichiers GH (sans calculer les composants Grasshopper). Les volumes absents du fichier ne seront pas inventés.</p></div><div class="panel" id="ghPanel" hidden><div class="heading">GRASSHOPPER · INSPECTION<button class="close" data-close="ghPanel">✕</button></div><div class="meta" id="ghSummary"></div><div id="ghTree" style="max-height:42dvh;overflow:auto;margin-top:12px"></div></div><div class="panel" id="layerPanel" hidden><div class="heading">VISIBILITY MANAGER<button class="close" data-close="layerPanel">✕</button></div><div id="layerList"></div></div><div class="panel" id="sectionPanel" hidden><div class="heading">COUPE HORIZONTALE<button class="close" data-close="sectionPanel">✕</button></div><label class="layer">Coupe active<input type="checkbox" id="clipEnabled"></label><input type="range" id="clipRange" min="0" max="100" value="60"><small id="clipLabel">60 %</small></div><div class="info" id="info" hidden><div class="heading"><span id="itemName">Objet</span><button class="close" id="closeInfo">✕</button></div><p class="meta" id="itemData"></p><nav><button id="isolate">Isoler</button><button id="showAll">Tout afficher</button></nav></div></div><section id="ghWorkspace" hidden aria-label="Grasshopper Canvas"><div id="ghBar"><button id="ghBack">‹ 3D</button><strong id="ghTitle">GRASSHOPPER CANVAS</strong><button id="ghMinus">−</button><button id="ghPlus">＋</button><button id="ghFit">⌖</button></div><div id="ghToolBar" role="toolbar" aria-label="Outils de sélection Grasshopper"><button data-gh-tool="select" class="active">↖ Sélection</button><button data-gh-tool="rectangle">▭ Rectangle</button><button data-gh-tool="pan">✋ Déplacer</button><button data-gh-tool="zoom">⌕ Zoom</button><button id="ghShowSelected">👁 Voir</button><button id="ghHideSelected">◉ Masquer</button><button id="ghIsolateSelected">◎ Isoler</button><button id="ghClearSelected">✕</button></div><div id="ghCanvasArea"><div id="ghSelectionBox" hidden></div><div id="ghWorld"><svg id="ghWires" width="4000" height="4000" viewBox="0 0 4000 4000" aria-hidden="true"></svg><div id="ghNodes"></div></div><div id="ghInfo">Importe un GHX pour afficher ses vrais composants et connexions. Les nodes binaires GH nécessitent un décodeur compatible.</div></div></section><footer><span id="counts">175 éléments de démo</span><span id="cameraLabel">Perspective</span></footer><div id="notice">Modèle fictif — aucun plan ni surface de projet réel. Import GLB local.</div></main><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">
+</style></head><body><main><header><div><strong>GAGA <em>3D</em></strong> <small>V1.6.0</small><div><small>3D VIEWER · TOUCH EDITION</small></div></div><small id="status">● DÉMO</small></header><nav><button id="demo" class="on">Démo</button><button id="import">＋ Importer un fichier</button><button id="ghMode">⌘ GH</button><button id="fit">⌖ Cadrer</button></nav><div class="viewport" id="viewport"><div class="floating label" id="modelName">MARCHÉ YASSAMINE — DÉMO</div><div class="floating tools"><button id="layers">▤</button><button id="section">◫</button><button id="reset">↺</button><button id="measure" title="Mesurer deux points" aria-pressed="false">📏</button></div><div class="floating views"><span></span><button data-view="top">TOP</button><span></span><button data-view="left">LEFT</button><button data-view="iso" class="on">3D</button><button data-view="right">RIGHT</button><span></span><button data-view="front">FACE</button></div><div class="floating hint">1 doigt : orbite · 2 doigts : zoom/pan</div><div class="panel" id="importPanel" hidden><div class="heading">IMPORT · FICHIERS<button class="close" data-close="importPanel">✕</button></div><p class="meta">Ouvrir un GH, GHX ou GLB depuis Fichiers. Si iOS grise ton GH, utilise le bouton ZIP de secours ci-dessous (compresse d’abord le GH dans Fichiers).</p><input id="file" type="file" aria-label="Choisir GH, GHX ou GLB"><button id="zipImport" type="button" style="width:100%;padding:13px;background:#245a73;border:1px solid #78c5eb;border-radius:12px;margin-bottom:9px">📦 Ouvrir un ZIP contenant le GH</button><input id="zipFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden><div id="dropZone" role="status" class="meta" style="border:1px dashed #6ba7c7;border-radius:11px;padding:12px;text-align:center">Ou glisse un fichier ici depuis Fichiers (iPad / ordinateur)</div><label class="layer"><span>Fichier renommé en .txt (le traiter comme .gh)</span><input type="checkbox" id="forceGh"></label><div class="meta" id="importDiagnostic" style="margin-top:12px">Sélecteur prêt. Sur iPhone : dans Fichiers, appui long sur le .gh → Compresser ; puis utilise « Ouvrir un ZIP contenant le GH ».</div><p class="meta" style="margin-top:12px">Lecture expérimentale des polylignes enregistrées dans les fichiers GH (sans calculer les composants Grasshopper). Les volumes absents du fichier ne seront pas inventés.</p></div><div class="panel" id="ghPanel" hidden><div class="heading">GRASSHOPPER · INSPECTION<button class="close" data-close="ghPanel">✕</button></div><div class="meta" id="ghSummary"></div><div id="ghTree" style="max-height:42dvh;overflow:auto;margin-top:12px"></div></div><div class="panel" id="layerPanel" hidden><div class="heading">VISIBILITY MANAGER<button class="close" data-close="layerPanel">✕</button></div><div id="layerList"></div></div><div id="measureHud" hidden role="status" aria-live="polite">
+<div class="measureHead"><strong>📏 MESURE A–B</strong><button id="measureClose" title="Quitter la mesure">✕</button></div>
+<div id="measureStatus">Touchez un sommet ou une courbe pour placer A.</div>
+<div id="measureResult" hidden><b id="measureLength"></b><div id="measureHorizontal"></div><div id="measureVertical"></div><div id="measureCoords"></div></div>
+<div class="measureActions"><button id="measureClear">↺ Recommencer</button><select id="measureUnit" aria-label="Unité de mesure"><option value="u">Unités modèle (inconnues)</option><option value="m">Coordonnées en mètres</option><option value="mm">Coordonnées en millimètres</option><option value="cm">Coordonnées en centimètres</option></select></div>
+</div><div class="panel" id="sectionPanel" hidden><div class="heading">COUPE HORIZONTALE<button class="close" data-close="sectionPanel">✕</button></div><label class="layer">Coupe active<input type="checkbox" id="clipEnabled"></label><input type="range" id="clipRange" min="0" max="100" value="60"><small id="clipLabel">60 %</small></div><div class="info" id="info" hidden><div class="heading"><span id="itemName">Objet</span><button class="close" id="closeInfo">✕</button></div><p class="meta" id="itemData"></p><nav><button id="isolate">Isoler</button><button id="showAll">Tout afficher</button></nav></div></div><section id="ghWorkspace" hidden aria-label="Grasshopper Canvas"><div id="ghBar"><button id="ghBack">‹ 3D</button><strong id="ghTitle">GRASSHOPPER CANVAS</strong><button id="ghMinus">−</button><button id="ghPlus">＋</button><button id="ghFit">⌖</button></div><div id="ghToolBar" role="toolbar" aria-label="Outils de sélection Grasshopper"><button data-gh-tool="select" class="active">↖ Sélection</button><button data-gh-tool="rectangle">▭ Rectangle</button><button data-gh-tool="pan">✋ Déplacer</button><button data-gh-tool="zoom">⌕ Zoom</button><button id="ghShowSelected">👁 Voir</button><button id="ghHideSelected">◉ Masquer</button><button id="ghIsolateSelected">◎ Isoler</button><button id="ghClearSelected">✕</button></div><div id="ghCanvasArea"><div id="ghSelectionBox" hidden></div><div id="ghWorld"><svg id="ghWires" width="4000" height="4000" viewBox="0 0 4000 4000" aria-hidden="true"></svg><div id="ghNodes"></div></div><div id="ghInfo">Importe un GHX pour afficher ses vrais composants et connexions. Les nodes binaires GH nécessitent un décodeur compatible.</div></div></section><footer><span id="counts">175 éléments de démo</span><span id="cameraLabel">Perspective</span></footer><div id="notice">Modèle fictif — aucun plan ni surface de projet réel. Import GLB local.</div></main><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">
 import * as T from 'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';import{GLTFLoader}from'three/addons/loaders/GLTFLoader.js';
 const $=x=>document.getElementById(x),scene=new T.Scene();scene.background=new T.Color('#14293b');const camera=new T.PerspectiveCamera(45,1,.01,1e6),renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.localClippingEnabled=true;$('viewport').prepend(renderer.domElement);const ctl=new OrbitControls(camera,renderer.domElement);ctl.enableDamping=true;ctl.screenSpacePanning=true;scene.add(new T.HemisphereLight(0xe7f3ff,0x355166,2));const light=new T.DirectionalLight(0xffffff,2);light.position.set(20,35,15);scene.add(light);let model=null,selected=null,original=null,parts=[],bbox=new T.Box3(),center=new T.Vector3(),size=new T.Vector3();const plane=new T.Plane(new T.Vector3(0,-1,0),0);
 function box(w,h,d,color,x,y,z,name){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);m.name=name;return m}
@@ -542,8 +556,91 @@ $('ghMinus').onclick=()=>ghZoomCenter(1/1.25);
  el.addEventListener('wheel',e=>{e.preventDefault();ghZoomAt(ghTransform.scale*(e.deltaY<0?1.12:1/1.12),e.clientX,e.clientY)},{passive:false});
 })();
 
-function load(next,isDemo,name){clearSelect();if(model)scene.remove(model);model=next;scene.add(model);$('modelName').textContent=name;$('status').textContent=isDemo?'● DÉMO':'● GLB CHARGÉ';$('demo').classList.toggle('on',isDemo);let count=0;model.traverse(o=>{if(o.isMesh)count++});$('counts').textContent=count+' maillages';$('notice').textContent=isDemo?'Démo fictive : aucune donnée architecturale validée.':'GLB chargé localement : géométrie et métadonnées disponibles dans le fichier.';fit();layers();clip()}
+function load(next,isDemo,name){measureReset();clearSelect();if(model)scene.remove(model);model=next;scene.add(model);$('modelName').textContent=name;$('status').textContent=isDemo?'● DÉMO':'● GLB CHARGÉ';$('demo').classList.toggle('on',isDemo);let count=0;model.traverse(o=>{if(o.isMesh)count++});$('counts').textContent=count+' maillages';$('notice').textContent=isDemo?'Démo fictive : aucune donnée architecturale validée.':'GLB chargé localement : géométrie et métadonnées disponibles dans le fichier.';fit();layers();clip()}
 function view(v){const d=measure()*1.6;const p=v==='top'?[.001,d,.001]:v==='front'?[0,0,d]:v==='left'?[-d,.001,0]:v==='right'?[d,.001,0]:[d*.75,d*.7,d*.8];camera.position.copy(center).add(new T.Vector3(...p));ctl.target.copy(center);ctl.update();$('cameraLabel').textContent=({top:'Dessus',front:'Face',left:'Gauche',right:'Droite',iso:'Perspective'})[v];document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===v))}
+
+let measureEnabled=false,measurePoints=[],measureMarks=new T.Group();
+measureMarks.name='Repères de mesure';scene.add(measureMarks);
+const measureRaycaster=new T.Raycaster();
+function measureReset(){
+ measurePoints=[];measureMarks.clear();
+ if($('measureResult'))$('measureResult').hidden=true;
+ if($('measureStatus'))$('measureStatus').textContent='Touchez une courbe ou un sommet pour placer le point A.';
+}
+function measureMode(on){
+ measureEnabled=on;
+ $('measureHud').hidden=!on;
+ $('measure').classList.toggle('measuring',on);
+ $('measure').setAttribute('aria-pressed',String(on));
+ ctl.enabled=!on;
+ if(on){clearSelect();measureReset()}else measureReset();
+}
+function measureSuffix(){const u=$('measureUnit').value;return u==='u'?' u.modèle':u}
+function measureUpdate(){
+ if(measurePoints.length<2)return;
+ const a=measurePoints[0],b=measurePoints[1],d=b.clone().sub(a),unit=measureSuffix();
+ $('measureLength').textContent='Distance 3D : '+d.length().toFixed(3)+unit;
+ $('measureHorizontal').textContent='Distance horizontale : '+Math.hypot(d.x,d.z).toFixed(3)+unit;
+ $('measureVertical').textContent='Dénivelé signé B − A : '+d.y.toFixed(3)+unit;
+ const fmt=p=>p.x.toFixed(3)+', '+p.z.toFixed(3)+', '+p.y.toFixed(3);
+ $('measureCoords').textContent='A (X,Y,Z) : '+fmt(a)+' · B (X,Y,Z) : '+fmt(b);
+ $('measureResult').hidden=false;
+ $('measureStatus').textContent='Mesure terminée. ↺ pour recommencer.';
+}
+function measureMark(p,label){
+ const box=new T.Box3().setFromObject(model);
+ const diagonal=Math.max(box.getSize(new T.Vector3()).length(),.01);
+ const r=diagonal*.006;
+ const dot=new T.Mesh(new T.SphereGeometry(r,12,8),new T.MeshBasicMaterial({color:label==='A'?0xffb43b:0x39e6f5,depthTest:false}));
+ dot.position.copy(p);dot.renderOrder=1000;measureMarks.add(dot);
+}
+function measureAdd(p){
+ if(measurePoints.length>=2)measureReset();
+ measurePoints.push(p.clone());
+ measureMark(p,measurePoints.length===1?'A':'B');
+ if(measurePoints.length===1){$('measureStatus').textContent='Point A enregistré · choisissez maintenant B.';return}
+ const geom=new T.BufferGeometry().setFromPoints(measurePoints);
+ const line=new T.Line(geom,new T.LineBasicMaterial({color:0xffb43b,depthTest:false,transparent:true}));
+ line.renderOrder=999;measureMarks.add(line);measureUpdate();
+}
+function measurePick(x,y){
+ if(!model)return;
+ const bounds=renderer.domElement.getBoundingClientRect();
+ if(!bounds.width||!bounds.height)return;
+ const px=(x-bounds.left)/bounds.width*2-1,py=-((y-bounds.top)/bounds.height*2-1);
+ measureRaycaster.setFromCamera(new T.Vector2(px,py),camera);
+ const distance=camera.position.distanceTo(ctl.target);
+ measureRaycaster.params.Line.threshold=Math.max(.005,Math.min(distance*Math.tan(T.MathUtils.degToRad(camera.fov)/2)*32/Math.max(bounds.height,1),distance*.04));
+ const hits=measureRaycaster.intersectObject(model,true).filter(hit=>{
+  const obj=hit.object;
+  if(!obj.isMesh&&!obj.isLine&&!obj.isLineSegments)return false;
+  for(let o=obj;o;o=o.parent)if(!o.visible)return false;
+  return !$('clipEnabled').checked||hit.point.y<=plane.constant;
+ });
+ if(!hits.length){$('measureStatus').textContent='Aucun élément touché. Zoomez puis touchez une courbe ou un sommet.';return}
+ const hit=hits[0],object=hit.object;
+ // Snap to the closest actual stored vertex within a finger-sized screen radius.
+ const pos=object.geometry?.attributes?.position;
+ let snapped=null,nearest=18*18;
+ if(pos){
+  const limit=Math.min(pos.count,60000),world=new T.Vector3(),ndc=new T.Vector3();
+  for(let i=0;i<limit;i++){
+   world.fromBufferAttribute(pos,i).applyMatrix4(object.matrixWorld);
+   if($('clipEnabled').checked&&world.y>plane.constant)continue;
+   ndc.copy(world).project(camera);
+   if(ndc.z< -1||ndc.z>1)continue;
+   const dx=(ndc.x-px)*bounds.width/2,dy=(ndc.y-py)*bounds.height/2;
+   const sq=dx*dx+dy*dy;
+   if(sq<nearest){nearest=sq;snapped=world.clone()}
+  }
+ }
+ measureAdd(snapped||hit.point);
+}
+$('measure').onclick=()=>measureMode(!measureEnabled);
+$('measureClose').onclick=()=>measureMode(false);
+$('measureClear').onclick=measureReset;
+$('measureUnit').onchange=measureUpdate;
+
 function pick(x,y){
  if(!model)return;
  const bounds=renderer.domElement.getBoundingClientRect();
@@ -611,5 +708,5 @@ $('zipFile').onchange=async e=>{
   await handleImport(file);
  }catch(err){$('importDiagnostic').textContent='Erreur ZIP : '+err.message;alert(err.message)}
 };
-const dz=$('dropZone');dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.background='#245a73'});dz.addEventListener('dragleave',()=>dz.style.background='');dz.addEventListener('drop',async e=>{e.preventDefault();dz.style.background='';await handleImport(e.dataTransfer.files?.[0])});$('fit').onclick=fit;$('reset').onclick=()=>{allVisible();fit();view('iso')};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view));$('layers').onclick=()=>{$('layerPanel').hidden=!$('layerPanel').hidden;$('sectionPanel').hidden=true};$('section').onclick=()=>{$('sectionPanel').hidden=!$('sectionPanel').hidden;$('layerPanel').hidden=true};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$((b.dataset.close)).hidden=true);$('clipEnabled').onchange=clip;$('clipRange').oninput=clip;$('closeInfo').onclick=clearSelect;$('isolate').onclick=()=>{if(!selected)return;for(const obj of parts)obj.visible=obj===selected||obj===selected.parent||!!obj.getObjectById(selected.id);layers()};$('showAll').onclick=()=>{allVisible()};let down=null,moved=false;renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};moved=false});renderer.domElement.addEventListener('pointermove',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>7)moved=true});renderer.domElement.addEventListener('pointerup',e=>{if(down&&!moved)pick(e.clientX,e.clientY);down=null});new ResizeObserver(()=>{const w=$('viewport').clientWidth,h=$('viewport').clientHeight;if(w&&h){camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}}).observe($('viewport'));load(makeDemo(),true,'MARCHÉ YASSAMINE — DÉMO');(function render(){requestAnimationFrame(render);ctl.update();renderer.render(scene,camera)})();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+const dz=$('dropZone');dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.background='#245a73'});dz.addEventListener('dragleave',()=>dz.style.background='');dz.addEventListener('drop',async e=>{e.preventDefault();dz.style.background='';await handleImport(e.dataTransfer.files?.[0])});$('fit').onclick=fit;$('reset').onclick=()=>{allVisible();fit();view('iso')};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view));$('layers').onclick=()=>{$('layerPanel').hidden=!$('layerPanel').hidden;$('sectionPanel').hidden=true};$('section').onclick=()=>{$('sectionPanel').hidden=!$('sectionPanel').hidden;$('layerPanel').hidden=true};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$((b.dataset.close)).hidden=true);$('clipEnabled').onchange=clip;$('clipRange').oninput=clip;$('closeInfo').onclick=clearSelect;$('isolate').onclick=()=>{if(!selected)return;for(const obj of parts)obj.visible=obj===selected||obj===selected.parent||!!obj.getObjectById(selected.id);layers()};$('showAll').onclick=()=>{allVisible()};let down=null,moved=false;renderer.domElement.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};moved=false});renderer.domElement.addEventListener('pointermove',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>7)moved=true});renderer.domElement.addEventListener('pointerup',e=>{if(down&&!moved){if(measureEnabled)measurePick(e.clientX,e.clientY);else pick(e.clientX,e.clientY)}down=null});new ResizeObserver(()=>{const w=$('viewport').clientWidth,h=$('viewport').clientHeight;if(w&&h){camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}}).observe($('viewport'));load(makeDemo(),true,'MARCHÉ YASSAMINE — DÉMO');(function render(){requestAnimationFrame(render);ctl.update();renderer.render(scene,camera)})();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script></body></html>
