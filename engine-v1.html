@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GAGA Geometry Engine V1 — iPhone</title>
+<style>
+:root{color-scheme:dark;--bg:#0a1724;--panel:#162b3e;--line:#38576c;--fg:#e8f6ff;--accent:#77d8f3}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px system-ui,-apple-system,sans-serif}
+header{height:56px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:#101e2c}
+header a{color:#9edaf3}header strong{letter-spacing:.08em}main{height:calc(100dvh - 56px);display:flex;flex-direction:column}
+#view{height:51%;min-height:220px;touch-action:none;position:relative}#view canvas{display:block;width:100%;height:100%;touch-action:none}
+#status{position:absolute;top:10px;left:10px;right:10px;color:#e5f6ff;font-size:11px;pointer-events:none;background:#0c2036ac;padding:8px;border-radius:9px}
+#controls{overflow:auto;flex:1;background:#112539;border-top:1px solid var(--line);padding:13px 15px calc(env(safe-area-inset-bottom) + 20px);overscroll-behavior:contain}
+button,select{color:var(--fg);background:#24536e;border:1px solid #608ca3;border-radius:10px;padding:10px;min-height:42px;font:inherit}
+button:disabled{opacity:.45}button[aria-pressed=true]{background:#337da0;border-color:#a5e9fa}
+.line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:9px 0}.line label{flex:1}.line output{min-width:65px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+#categories{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}#categories label{padding:8px;background:#18364a;border-radius:8px;font-size:11px;display:flex;gap:5px;align-items:center}
+h2{font-size:13px;letter-spacing:.08em;margin:15px 0 8px}small{color:#a8c5d4;line-height:1.5}#diagnostic{white-space:pre-wrap;font-size:11px;color:#c5dfec;line-height:1.5}
+@media(min-width:800px){main{flex-direction:row}#view{height:100%;width:66%}#controls{width:34%;height:100%}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head><body>
+<header><strong>GAGA <span style="color:#77d8f3">GEOMETRY V1</span></strong><a href="./index.html">‹ Viewer principal</a></header>
+<main><section id="view"><div id="status">Moteur local iPhone · Chargement…</div></section>
+<section id="controls"><div class="line"><strong>CONCEPT</strong><select id="concept"><option value="A">A — Halle climatique</option><option value="B">B — Rue marchande</option></select></div>
+<h2>TOITURE PARAMÉTRIQUE</h2>
+<div class="line"><label for="eave">Hauteur égout</label><output id="eaveVal"></output></div><input id="eave" type="range" step=".1">
+<div class="line"><label for="ridge">Hauteur faîtage</label><output id="ridgeVal"></output></div><input id="ridge" type="range" step=".1">
+<div class="line"><label for="overhang">Débord</label><output id="overhangVal"></output></div><input id="overhang" type="range" min="0" max="2" step=".1">
+<div id="skyRow"><div class="line"><label for="sky">Largeur bande vitrée</label><output id="skyVal"></output></div><input id="sky" type="range" min=".5" max="4" step=".1"></div>
+<div class="line"><label for="showRoof">Afficher toiture (OFF initialement)</label><input id="showRoof" type="checkbox"></div>
+<div class="line"><label for="showServices">Afficher services et circulations</label><input id="showServices" type="checkbox"></div>
+<h2>VISIBILITÉ COMMERCES P01–P09</h2><div id="categories"></div>
+<div class="actions"><button id="showAll">Tout voir</button><button id="hideAll">Tout cacher</button><button id="fit">Cadrer</button></div>
+<h2>ENREGISTREMENT IPHONE</h2><div class="actions"><button id="saveJson">JSON</button><button id="saveGlb">GLB 3D</button><button id="reset">Réinitialiser</button></div>
+<small>Prototype autonome sans Rhino ni serveur de calcul. Les exports .gh/.ghx ne sont pas disponibles dans V1. Les toitures sont des surfaces sans épaisseur. L'implantation, les circulations, la conformité et les débords fonciers ne sont pas validés.</small>
+<h2>CONTRÔLES DE COHÉRENCE</h2><pre id="diagnostic"></pre></section></main>
+<script type="module">
+import * as T from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+const $=id=>document.getElementById(id);
+const MODULES={P01:[120,2.5,2.4,0x65ad61],P02:[10,3,4,0x327fcd],P03:[10,4,5,0xea8b35],P04:[15,2.5,4,0xe4ba47],P05:[10,5,5,0x9163b7],P06:[3,3,4,0x3eada5],P07:[3,3,4,0xcd565a],P08:[2,5,5,0x8a969f],P09:[2,5,5,0xa9774f]};
+const ROW_PACKS={A:['55593322674444','5559332267444','55833322264444','55833322274444'],B:['555593332226674444','555893332226774444','5558333322224444444']};
+const CFG={A:{w:40,l:58,h:3.2,fl:[20,20,20,20,20,20],eave:5.5,ridge:7.5,overhang:1,main:null},B:{w:32,l:72.5,h:3.5,fl:[24,24,24,24,24],eave:5,ridge:7,overhang:.8,sky:2.5,main:2.1}};
+const CATEGORIES=Object.keys(MODULES);let active='A',model=null,roofGroup=null,shopsGroup=null,serviceGroup=null,layout=null;
+const renderer=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));$('view').append(renderer.domElement);
+const scene=new T.Scene();scene.background=new T.Color('#152b3c');
+const camera=new T.PerspectiveCamera(45,1,.01,5000),orbit=new OrbitControls(camera,renderer.domElement);
+orbit.enableDamping=true;scene.add(new T.HemisphereLight(0xffffff,0x425b74,2.5));
+const light=new T.DirectionalLight(0xffffff,2.0);light.position.set(25,65,35);scene.add(light);
+function rect(x,y,w,h){if(!(w>0&&h>0))throw Error('Rectangle invalide');return [x,y,x+w,y+h]}
+function area(r){return (r[2]-r[0])*(r[3]-r[1])}
+function approx(a,b){return Math.abs(a-b)<.0001}
+function layoutFor(key){
+ const c=CFG[key],t=(c.w+c.l-Math.sqrt((c.w+c.l)**2-800))/4,wi=c.w-2*t;
+ const service=rect(t,t,wi,85/wi),cross=rect(t,service[3],wi,2),y0=cross[3],y1=c.l-t;
+ const rows=[...c.fl.map(n=>Array(n).fill('P01')),...ROW_PACKS[key].map(s=>Array.from(s,x=>'P0'+x))];
+ const depths=rows.map(row=>Math.max(...row.map(code=>MODULES[code][2])));
+ const n=rows.length/2+1,free=wi-depths.reduce((a,b)=>a+b,0);
+ if(free<=0)throw Error('Circulations impossibles');
+ const aisles=c.main===null?Array(n).fill(free/n):Array(n).fill((free-c.main)/(n-1));
+ if(c.main!==null)aisles[Math.floor(n/2)]=c.main;
+ const shops=[],paths=[cross],residual=[];let x=t,idx=0;
+ for(let j=0;j<rows.length;j++){
+   if(j%2===0){paths.push(rect(x,y0,aisles[j/2],y1-y0));x+=aisles[j/2]}
+   const depth=depths[j],x0=x,x1=x+depth,left=j%2===0;let y=y0;
+   for(const code of rows[j]){
+     const m=MODULES[code],sx=left?x0:x1-m[2],r=rect(sx,y,m[2],m[1]);
+     if(r[3]>y1+.000001)throw Error('Commerce hors enveloppe');
+     if(m[2]<depth-.000001)residual.push(rect(left?sx+m[2]:x0,y,depth-m[2],m[1]));
+     shops.push({code,id:key+'-'+code+'-'+String(++idx).padStart(3,'0'),rect:r});
+     y+=m[1];
+   }
+   if(y<y1-.000001)residual.push(rect(x0,y,depth,y1-y));x=x1;
+ }
+ paths.push(rect(x,y0,aisles[n-1],y1-y0));
+ const shopArea=shops.reduce((s,o)=>s+area(o.rect),0),pathArea=paths.reduce((s,r)=>s+area(r),0),resArea=residual.reduce((s,r)=>s+area(r),0);
+ if(!approx(shops.length,175)||!approx(shopArea,1612)||!approx(area(service),85)||!approx(pathArea+resArea,423)||!approx(x+aisles[n-1],c.w-t))throw Error('Contrôle surfaces / quantités échoué');
+ for(const [code,m] of Object.entries(MODULES))if(shops.filter(o=>o.code===code).length!==m[0])throw Error('Quantité incorrecte '+code);
+ return {c,shops,service,paths,residual,shopArea,pathArea,resArea,minAisle:Math.min(...aisles)};
+}
+function box(r,h,color,name){const m=new T.Mesh(new T.BoxGeometry(r[2]-r[0],h,r[3]-r[1]),new T.MeshStandardMaterial({color,roughness:.8}));m.position.set((r[0]+r[2])/2,h/2,(r[1]+r[3])/2);m.name=name;return m}
+function sheet(name,a,b,c,d,color,opacity){
+ const verts=[...a,...b,...c,...a,...c,...d],g=new T.BufferGeometry();
+ g.setAttribute('position',new T.Float32BufferAttribute(verts,3));g.computeVertexNormals();
+ const mesh=new T.Mesh(g,new T.MeshStandardMaterial({color,transparent:opacity<1,opacity,side:T.DoubleSide,depthWrite:opacity===1,roughness:.55}));
+ mesh.name=name;return mesh;
+}
+function makeRoof(){
+ const c=CFG[active],e=+$('eave').value,r=+$('ridge').value,o=+$('overhang').value,s=+$('sky').value;
+ if(!(r>e&&e>c.h))throw Error('Hauteurs toiture invalides');
+ const y0=-o,y1=c.l+o,xL=-o,xR=c.w+o,xM=c.w/2,span=xM+o;
+ const z=x=>r-(r-e)*Math.abs(x-xM)/span;
+ const surf=(name,xa,xb,color,alpha)=>sheet(name,[xa,z(xa),y0],[xb,z(xb),y0],[xb,z(xb),y1],[xa,z(xa),y1],color,alpha);
+ if(active==='A'){roofGroup.add(surf('A ROOF LEFT',xL,xM,0x7db5c1,.76));roofGroup.add(surf('A ROOF RIGHT',xM,xR,0x7db5c1,.76))}
+ else{
+   const edgeL=xM-s/2,edgeR=xM+s/2;
+   roofGroup.add(surf('B ROOF OPAQUE LEFT',xL,edgeL,0xb49ca5,.78));
+   roofGroup.add(surf('B ROOF GLASS LEFT',edgeL,xM,0x78cde5,.48));
+   roofGroup.add(surf('B ROOF GLASS RIGHT',xM,edgeR,0x78cde5,.48));
+   roofGroup.add(surf('B ROOF OPAQUE RIGHT',edgeR,xR,0xb49ca5,.78));
+ }
+ roofGroup.visible=$('showRoof').checked;
+}
+function clearGroup(group){while(group.children.length){const o=group.children[0];group.remove(o);o.geometry?.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose())}}}
+function build(){
+ if(model){scene.remove(model);model.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose()}})}
+ layout=layoutFor(active);model=new T.Group();model.name='GAGA V3D04 '+active;
+ shopsGroup=new T.Group();shopsGroup.name='COMMERCES';model.add(shopsGroup);
+ for(const code of CATEGORIES){const g=new T.Group();g.name=code;g.userData.code=code;shopsGroup.add(g);
+  for(const o of layout.shops.filter(a=>a.code===code)){const mesh=box(o.rect,layout.c.h,MODULES[code][3],o.id);mesh.userData={code,area:area(o.rect)};g.add(mesh)}}
+ serviceGroup=new T.Group();serviceGroup.name='SERVICES ET CIRCULATIONS';model.add(serviceGroup);
+ serviceGroup.add(box(layout.service,.12,0xb8bbc7,'Services 85 m2'));
+ layout.paths.forEach((r,i)=>serviceGroup.add(box(r,.035,0xd1bb83,'Circulation provisoire '+i)));
+ serviceGroup.visible=$('showServices').checked;
+ roofGroup=new T.Group();roofGroup.name='TOITURES';model.add(roofGroup);
+ makeRoof();scene.add(model);updateCategoryVisibility();fit();
+ $('diagnostic').textContent='Concept '+active+' · '+layout.shops.length+' commerces\nSurface commerces : '+layout.shopArea.toFixed(2)+' m²\nServices : 85.00 m²\nCirculations provisoires : '+layout.pathArea.toFixed(2)+' m²\nSurfaces résiduelles : '+layout.resArea.toFixed(2)+' m²\nTotal SU : '+(layout.shopArea+85+layout.pathArea+layout.resArea).toFixed(2)+' m²\nLargeur passage min. : '+layout.minAisle.toFixed(2)+' m\n⚠ Implantation, accès et exigences réglementaires non vérifiés';
+ $('status').textContent='GAGA '+active+' · 175 commerces · Toiture '+(active==='A'?'2':'4')+' surfaces · moteur local';
+}
+function updateCategoryVisibility(){for(const g of shopsGroup.children)g.visible=$('cat-'+g.userData.code).checked}
+function fit(){const b=new T.Box3().setFromObject(model);const c=b.getCenter(new T.Vector3()),d=b.getSize(new T.Vector3()).length();camera.position.copy(c).add(new T.Vector3(d*.65,d*.75,d*.8));camera.near=Math.max(.01,d/10000);camera.far=d*200;camera.updateProjectionMatrix();orbit.target.copy(c);orbit.update()}
+function resize(){const v=$('view'),w=v.clientWidth,h=v.clientHeight;if(w&&h){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}}
+const categories=$('categories');for(const code of CATEGORIES){const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.id='cat-'+code;input.checked=true;input.onchange=updateCategoryVisibility;label.append(input,document.createTextNode(code));categories.append(label)}
+function configure(){const c=CFG[active];for(const [id,min,max,val] of [['eave',active==='A'?4:4.2,6,c.eave],['ridge',6.5,10,c.ridge],['overhang',0,2,c.overhang],['sky',.5,4,c.sky??2.5]]){const el=$(id);el.min=min;el.max=max;el.value=val;$(id+'Val').value=Number(val).toFixed(2)+' m'}$('skyRow').hidden=active==='A';$('showRoof').checked=false;$('showServices').checked=false}
+for(const id of ['eave','ridge','overhang','sky'])$(id).addEventListener('input',()=>{$(id+'Val').value=(+$(id).value).toFixed(2)+' m';clearGroup(roofGroup);try{makeRoof()}catch(e){$('status').textContent=e.message}});
+$('concept').onchange=()=>{active=$('concept').value;configure();build()};
+$('showRoof').onchange=()=>{roofGroup.visible=$('showRoof').checked};
+$('showServices').onchange=()=>{serviceGroup.visible=$('showServices').checked};
+$('showAll').onclick=()=>{for(const code of CATEGORIES)$('cat-'+code).checked=true;updateCategoryVisibility()};
+$('hideAll').onclick=()=>{for(const code of CATEGORIES)$('cat-'+code).checked=false;updateCategoryVisibility()};
+$('fit').onclick=fit;$('reset').onclick=()=>{configure();for(const code of CATEGORIES)$('cat-'+code).checked=true;build()};
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+$('saveJson').onclick=()=>{const snapshot={schema:'gaga.geometry.v1',source:'GAGA_05_8_4_TOITURES_AB_V3D04_R1.py',concept:active,units:'m',parameters:{eave:+$('eave').value,ridge:+$('ridge').value,overhang:+$('overhang').value,skylight:active==='B'?+$('sky').value:null},shops:layout.shops,service:layout.service,circulations:layout.paths,residual:layout.residual,visibleCategories:CATEGORIES.filter(code=>$('cat-'+code).checked),roofVisible:$('showRoof').checked,disclaimer:'Prototype non implanté sur DWG, conformité non validée'};download(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}),'GAGA_V3D04_'+active+'.json')};
+$('saveGlb').onclick=async()=>{const b=$('saveGlb');b.disabled=true;try{const exporter=new GLTFExporter();const data=await exporter.parseAsync(model,{binary:true,onlyVisible:true});download(new Blob([data],{type:'model/gltf-binary'}),'GAGA_V3D04_'+active+'.glb')}catch(e){$('status').textContent='Export GLB : '+e.message}finally{b.disabled=false}};
+window.addEventListener('resize',resize);new ResizeObserver(resize).observe($('view'));
+configure();try{build()}catch(e){$('status').textContent='Erreur : '+e.message;$('diagnostic').textContent=e.stack||String(e)}
+resize();renderer.setAnimationLoop(()=>{orbit.update();renderer.render(scene,camera)});
+</script></body></html>
