@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1929"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GAGA 3D"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>GAGA 3D Viewer V1.4.1</title><style>
+<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1929"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GAGA 3D"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>GAGA 3D Viewer V1.5.0</title><style>
 :root{color-scheme:dark;--bg:#08131f;--glass:rgba(13,28,43,.85);--stroke:rgba(164,211,235,.18);--accent:#77d8f3;--muted:#92abbb}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#edf8ff;font:14px -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}body{overscroll-behavior:none}
 main{height:100dvh;width:100%;position:relative;display:flex;flex-direction:column;gap:0;padding:0;background:#08131f}
@@ -58,7 +58,7 @@ input[type=range]{accent-color:#69caea;width:100%}
 footer{position:absolute;z-index:3;bottom:calc(env(safe-area-inset-bottom) + 13px);left:18px;right:18px;display:flex;justify-content:space-between;font-size:10px;color:#a3c0d0;pointer-events:none}
 #notice{display:none}
 @media (min-width:800px){.panel{left:16px;right:auto;top:160px;bottom:auto;width:350px;max-height:calc(100% - 190px);border-radius:21px;border-bottom:1px solid #4d7085;padding-bottom:20px}nav{left:50%;right:auto;transform:translateX(-50%);width:390px}.views{bottom:130px}.hint{bottom:120px}.info{left:50%;right:auto;transform:translateX(-50%);width:350px}.label{top:120px}.tools{top:120px}}
-</style></head><body><main><header><div><strong>GAGA <em>3D</em></strong> <small>V1.4.1</small><div><small>3D VIEWER · TOUCH EDITION</small></div></div><small id="status">● DÉMO</small></header><nav><button id="demo" class="on">Démo</button><button id="import">＋ Importer un fichier</button><button id="ghMode">⌘ GH</button><button id="fit">⌖ Cadrer</button></nav><div class="viewport" id="viewport"><div class="floating label" id="modelName">MARCHÉ YASSAMINE — DÉMO</div><div class="floating tools"><button id="layers">▤</button><button id="section">◫</button><button id="reset">↺</button></div><div class="floating views"><span></span><button data-view="top">TOP</button><span></span><button data-view="left">LEFT</button><button data-view="iso" class="on">3D</button><button data-view="right">RIGHT</button><span></span><button data-view="front">FACE</button></div><div class="floating hint">1 doigt : orbite · 2 doigts : zoom/pan</div><div class="panel" id="importPanel" hidden><div class="heading">IMPORT · FICHIERS<button class="close" data-close="importPanel">✕</button></div><p class="meta">Ouvrir un GH, GHX ou GLB depuis Fichiers. Si iOS grise ton GH, utilise le bouton ZIP de secours ci-dessous (compresse d’abord le GH dans Fichiers).</p><input id="file" type="file" aria-label="Choisir GH, GHX ou GLB"><button id="zipImport" type="button" style="width:100%;padding:13px;background:#245a73;border:1px solid #78c5eb;border-radius:12px;margin-bottom:9px">📦 Ouvrir un ZIP contenant le GH</button><input id="zipFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden><div id="dropZone" role="status" class="meta" style="border:1px dashed #6ba7c7;border-radius:11px;padding:12px;text-align:center">Ou glisse un fichier ici depuis Fichiers (iPad / ordinateur)</div><label class="layer"><span>Fichier renommé en .txt (le traiter comme .gh)</span><input type="checkbox" id="forceGh"></label><div class="meta" id="importDiagnostic" style="margin-top:12px">Sélecteur prêt. Sur iPhone : dans Fichiers, appui long sur le .gh → Compresser ; puis utilise « Ouvrir un ZIP contenant le GH ».</div><p class="meta" style="margin-top:12px">Lecture expérimentale des polylignes enregistrées dans les fichiers GH (sans calculer les composants Grasshopper). Les volumes absents du fichier ne seront pas inventés.</p></div><div class="panel" id="ghPanel" hidden><div class="heading">GRASSHOPPER · INSPECTION<button class="close" data-close="ghPanel">✕</button></div><div class="meta" id="ghSummary"></div><div id="ghTree" style="max-height:42dvh;overflow:auto;margin-top:12px"></div></div><div class="panel" id="layerPanel" hidden><div class="heading">VISIBILITY MANAGER<button class="close" data-close="layerPanel">✕</button></div><div id="layerList"></div></div><div class="panel" id="sectionPanel" hidden><div class="heading">COUPE HORIZONTALE<button class="close" data-close="sectionPanel">✕</button></div><label class="layer">Coupe active<input type="checkbox" id="clipEnabled"></label><input type="range" id="clipRange" min="0" max="100" value="60"><small id="clipLabel">60 %</small></div><div class="info" id="info" hidden><div class="heading"><span id="itemName">Objet</span><button class="close" id="closeInfo">✕</button></div><p class="meta" id="itemData"></p><nav><button id="isolate">Isoler</button><button id="showAll">Tout afficher</button></nav></div></div><section id="ghWorkspace" hidden aria-label="Grasshopper Canvas"><div id="ghBar"><button id="ghBack">‹ 3D</button><strong id="ghTitle">GRASSHOPPER CANVAS</strong><button id="ghMinus">−</button><button id="ghPlus">＋</button><button id="ghFit">⌖</button></div><div id="ghCanvasArea"><div id="ghWorld"><svg id="ghWires" width="4000" height="4000" viewBox="0 0 4000 4000" aria-hidden="true"></svg><div id="ghNodes"></div></div><div id="ghInfo">Importe un GHX pour afficher ses vrais composants et connexions. Les nodes binaires GH nécessitent un décodeur compatible.</div></div></section><footer><span id="counts">175 éléments de démo</span><span id="cameraLabel">Perspective</span></footer><div id="notice">Modèle fictif — aucun plan ni surface de projet réel. Import GLB local.</div></main><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">
+</style></head><body><main><header><div><strong>GAGA <em>3D</em></strong> <small>V1.5.0</small><div><small>3D VIEWER · TOUCH EDITION</small></div></div><small id="status">● DÉMO</small></header><nav><button id="demo" class="on">Démo</button><button id="import">＋ Importer un fichier</button><button id="ghMode">⌘ GH</button><button id="fit">⌖ Cadrer</button></nav><div class="viewport" id="viewport"><div class="floating label" id="modelName">MARCHÉ YASSAMINE — DÉMO</div><div class="floating tools"><button id="layers">▤</button><button id="section">◫</button><button id="reset">↺</button></div><div class="floating views"><span></span><button data-view="top">TOP</button><span></span><button data-view="left">LEFT</button><button data-view="iso" class="on">3D</button><button data-view="right">RIGHT</button><span></span><button data-view="front">FACE</button></div><div class="floating hint">1 doigt : orbite · 2 doigts : zoom/pan</div><div class="panel" id="importPanel" hidden><div class="heading">IMPORT · FICHIERS<button class="close" data-close="importPanel">✕</button></div><p class="meta">Ouvrir un GH, GHX ou GLB depuis Fichiers. Si iOS grise ton GH, utilise le bouton ZIP de secours ci-dessous (compresse d’abord le GH dans Fichiers).</p><input id="file" type="file" aria-label="Choisir GH, GHX ou GLB"><button id="zipImport" type="button" style="width:100%;padding:13px;background:#245a73;border:1px solid #78c5eb;border-radius:12px;margin-bottom:9px">📦 Ouvrir un ZIP contenant le GH</button><input id="zipFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden><div id="dropZone" role="status" class="meta" style="border:1px dashed #6ba7c7;border-radius:11px;padding:12px;text-align:center">Ou glisse un fichier ici depuis Fichiers (iPad / ordinateur)</div><label class="layer"><span>Fichier renommé en .txt (le traiter comme .gh)</span><input type="checkbox" id="forceGh"></label><div class="meta" id="importDiagnostic" style="margin-top:12px">Sélecteur prêt. Sur iPhone : dans Fichiers, appui long sur le .gh → Compresser ; puis utilise « Ouvrir un ZIP contenant le GH ».</div><p class="meta" style="margin-top:12px">Lecture expérimentale des polylignes enregistrées dans les fichiers GH (sans calculer les composants Grasshopper). Les volumes absents du fichier ne seront pas inventés.</p></div><div class="panel" id="ghPanel" hidden><div class="heading">GRASSHOPPER · INSPECTION<button class="close" data-close="ghPanel">✕</button></div><div class="meta" id="ghSummary"></div><div id="ghTree" style="max-height:42dvh;overflow:auto;margin-top:12px"></div></div><div class="panel" id="layerPanel" hidden><div class="heading">VISIBILITY MANAGER<button class="close" data-close="layerPanel">✕</button></div><div id="layerList"></div></div><div class="panel" id="sectionPanel" hidden><div class="heading">COUPE HORIZONTALE<button class="close" data-close="sectionPanel">✕</button></div><label class="layer">Coupe active<input type="checkbox" id="clipEnabled"></label><input type="range" id="clipRange" min="0" max="100" value="60"><small id="clipLabel">60 %</small></div><div class="info" id="info" hidden><div class="heading"><span id="itemName">Objet</span><button class="close" id="closeInfo">✕</button></div><p class="meta" id="itemData"></p><nav><button id="isolate">Isoler</button><button id="showAll">Tout afficher</button></nav></div></div><section id="ghWorkspace" hidden aria-label="Grasshopper Canvas"><div id="ghBar"><button id="ghBack">‹ 3D</button><strong id="ghTitle">GRASSHOPPER CANVAS</strong><button id="ghMinus">−</button><button id="ghPlus">＋</button><button id="ghFit">⌖</button></div><div id="ghCanvasArea"><div id="ghWorld"><svg id="ghWires" width="4000" height="4000" viewBox="0 0 4000 4000" aria-hidden="true"></svg><div id="ghNodes"></div></div><div id="ghInfo">Importe un GHX pour afficher ses vrais composants et connexions. Les nodes binaires GH nécessitent un décodeur compatible.</div></div></section><footer><span id="counts">175 éléments de démo</span><span id="cameraLabel">Perspective</span></footer><div id="notice">Modèle fictif — aucun plan ni surface de projet réel. Import GLB local.</div></main><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">
 import * as T from 'three';import{OrbitControls}from'three/addons/controls/OrbitControls.js';import{GLTFLoader}from'three/addons/loaders/GLTFLoader.js';
 const $=x=>document.getElementById(x),scene=new T.Scene();scene.background=new T.Color('#14293b');const camera=new T.PerspectiveCamera(45,1,.01,1e6),renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.localClippingEnabled=true;$('viewport').prepend(renderer.domElement);const ctl=new OrbitControls(camera,renderer.domElement);ctl.enableDamping=true;ctl.screenSpacePanning=true;scene.add(new T.HemisphereLight(0xe7f3ff,0x355166,2));const light=new T.DirectionalLight(0xffffff,2);light.position.set(20,35,15);scene.add(light);let model=null,selected=null,original=null,parts=[],bbox=new T.Box3(),center=new T.Vector3(),size=new T.Vector3();const plane=new T.Plane(new T.Vector3(0,-1,0),0);
 function box(w,h,d,color,x,y,z,name){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color,roughness:.8}));m.position.set(x,y,z);m.name=name;return m}
@@ -131,18 +131,22 @@ async function requireFflate(){
  if(!window.fflate)throw Error('Décodeur GH indisponible');
  return window.fflate;
 }
-function extractSavedPolylines(archive,fflate){
+function extractSavedPolylines(archive,fflate,ranges){
  const marker=new Uint8Array([7,79,78,95,68,97,116,97,255,255,255,255,20,0,0,0]);
  const type=new TextEncoder().encode('Rhino.Geometry.PolylineCurve');
- const seen=new Set(),results=[];
- const dv=new DataView(archive.buffer,archive.byteOffset,archive.byteLength);
+ const results=[],dv=new DataView(archive.buffer,archive.byteOffset,archive.byteLength);
  const hasType=data=>{outer:for(let i=0;i<=data.length-type.length;i++){for(let j=0;j<type.length;j++)if(data[i+j]!==type[j])continue outer;return true}return false};
+ let range=0;
  for(let i=0;i+marker.length+4<archive.length;i++){
   if(archive[i]!==marker[0])continue;
   let ok=true;for(let j=1;j<marker.length;j++)if(archive[i+j]!==marker[j]){ok=false;break}
   if(!ok)continue;
   const start=i+marker.length,bytes=dv.getUint32(start,true),offset=start+4;
   if(bytes<20||bytes>2000000||offset+bytes>archive.length)continue;
+  while(range+1<ranges.length&&ranges[range+1].offset<=i)range++;
+  const owner=ranges[range];
+  // Only associate ON_Data from a verified top-level GH Object section.
+  if(!owner||owner.offset>i)continue;
   let blob;try{blob=fflate.inflateSync(archive.subarray(offset,offset+bytes))}catch{continue}
   if(blob.length>2000000||!hasType(blob))continue;
   const view=new DataView(blob.buffer,blob.byteOffset,blob.byteLength);
@@ -160,10 +164,7 @@ function extractSavedPolylines(archive,fflate){
    if(!valid||!pts.slice(1).some(p=>Math.hypot(p[0]-pts[0][0],p[1]-pts[0][1],p[2]-pts[0][2])>0.001))continue;
    selected=pts;break;
   }
-  if(selected){
-   const key=selected.map(p=>p.map(v=>v.toFixed(6)).join(',')).join(';');
-   if(!seen.has(key)){seen.add(key);results.push(selected)}
-  }
+  if(selected)results.push({points:selected,nodeIndex:owner.nodeIndex});
   i=offset+bytes-1;
  }
  return results;
@@ -175,26 +176,46 @@ async function loadGhGeometry(file){
  let archive;try{archive=fflate.inflateSync(raw)}catch{throw Error('Format GH binaire non reconnu : archive compressée incompatible')}
  if(archive.length>30000000)throw Error('Archive GH décompressée trop volumineuse');
  ghParseBinary(archive,file.name);
- const curves=extractSavedPolylines(archive,fflate);
+ const ranges=[];
+ const view=new DataView(archive.buffer,archive.byteOffset,archive.byteLength);
+ for(let i=0;i+19<archive.length;i++){
+  if(archive[i]!==6||archive[i+1]!==79||archive[i+2]!==98||archive[i+3]!==106||archive[i+4]!==101||archive[i+5]!==99||archive[i+6]!==116)continue;
+  if(view.getInt32(i+11,true)!==2||view.getInt32(i+15,true)!==1)continue;
+  ranges.push({offset:i,nodeIndex:ranges.length});i+=18;
+ }
+ if(ranges.length!==ghNodes.length)throw Error('Impossible d’associer les courbes aux nodes GH de façon fiable');
+ const curves=extractSavedPolylines(archive,fflate,ranges);
  if(!curves.length)throw Error('Aucune polyligne enregistrée décodable trouvée dans ce GH. Ce lecteur ne calcule pas Grasshopper.');
  const root=new T.Group();root.name='Géométrie enregistrée du GH';
- const group=new T.Group();group.name='Polylignes GH';root.add(group);
- curves.forEach((poly,i)=>{
-  const vertices=poly.map(([x,y,z])=>new T.Vector3(x,z,y));
+ const group=new T.Group();group.name='Polylignes par node GH';root.add(group);
+ const owners=new Map();let accepted=0;
+ curves.forEach((entry,i)=>{
+  const node=ghNodes[entry.nodeIndex];
+  if(!node||node.name!=='Curve')return;
+  let container=owners.get(entry.nodeIndex);
+  if(!container){
+   container=new T.Group();container.name=node.nickname||node.name||'Curve';
+   group.add(container);owners.set(entry.nodeIndex,container);
+  }
+  const vertices=entry.points.map(([x,y,z])=>new T.Vector3(x,z,y));
   const geometry=new T.BufferGeometry().setFromPoints(vertices);
   const line=new T.Line(geometry,new T.LineBasicMaterial({color:0x7ad8f1}));
-  line.name='Courbe '+String(i+1).padStart(3,'0');
-  line.userData={source:'Polyligne enregistrée',points:poly.length,hauteur:'Coordonnées originales'};
-  group.add(line);
+  line.name=(node.nickname||'Curve')+' · '+String(container.children.length+1);
+  line.userData={source:'GH ON_Data',nodeGuid:node.guid,points:entry.points.length};
+  container.add(line);node.geometry.push(line);accepted++;
  });
+ if(!accepted)throw Error('Aucune courbe ne correspond à un node Curve vérifié');
  load(root,false,file.name);
- $('status').textContent='● GH GÉOMÉTRIE';
- $('counts').textContent=curves.length+' courbes GH';
- $('notice').textContent='Courbes réellement enregistrées dans le GH. Aucun composant exécuté, aucune hauteur ajoutée.';
+ ghRender();
+ $('status').textContent='● GH NODES';
+ $('counts').textContent=accepted+' courbes · '+owners.size+' nodes';
+ $('notice').textContent='Données enregistrées liées aux nodes Curve. Aucune sortie calculée par Grasshopper.';
  $('ghPanel').hidden=false;$('importPanel').hidden=true;
- $('ghSummary').textContent=curves.length+' polylignes distinctes extraites du GH. Coordonnées 3D d’origine conservées. Utilise ▤ pour afficher ou masquer les courbes.';
+ $('ghSummary').textContent=accepted+' courbes conservées avec provenance · '+owners.size+' nodes Curve contrôlables dans ⌘ GH.';
  $('ghTree').replaceChildren();
- const p=document.createElement('p');p.className='meta';p.textContent='Le fichier Grasshopper contient des données géométriques enregistrées. Les composants non calculés et les volumes non enregistrés ne peuvent pas être reconstitués par ce lecteur.';$('ghTree').append(p);
+ const p=document.createElement('p');p.className='meta';p.textContent='Ouvre ⌘ GH, puis utilise ◉ / ○ sur un node Curve pour afficher ou masquer uniquement ses courbes enregistrées. Les autres nodes restent consultables sans inventer leur géométrie.';$('ghTree').append(p);
+ ghMessage(ghNodes.length+' nodes · '+owners.size+' commandes de visibilité Curve disponibles · '+accepted+' courbes ON_Data associées.');
+
 }
 async function inspectGrasshopper(file,raw){
  const binary=/\.gh$/i.test(file.name)||($('forceGh').checked&&/\.txt$/i.test(file.name));
@@ -236,7 +257,7 @@ function ghRender(){
   if(n.geometry&&n.geometry.length){
    eye.disabled=false;eye.textContent=n.visible===false?'○':'◉';
    eye.title='Afficher ou masquer la géométrie de ce node';
-   eye.onclick=e=>{e.stopPropagation();n.visible=n.visible===false;for(const obj of n.geometry)obj.visible=n.visible;eye.textContent=n.visible?'◉':'○';};
+   eye.onclick=e=>{e.stopPropagation();n.visible=n.visible===false;for(const obj of n.geometry)obj.visible=n.visible;eye.textContent=n.visible?'◉':'○';eye.setAttribute('aria-pressed',String(n.visible));};
   }
   head.append(name,eye);
   const body=document.createElement('div');body.className='gh-node-body';
