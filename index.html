@@ -410,7 +410,7 @@ $('ghMinus').onclick=()=>ghZoomCenter(1/1.25);
  el.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0)return;
   pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  try{el.setPointerCapture(e.pointerId)}catch{}
+  if(!e.target.closest('.gh-node')||pointers.size>1){try{el.setPointerCapture(e.pointerId)}catch{}}
   if(pointers.size===1){
    gesture={kind:'pan',x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,canPan:!e.target.closest('.gh-node')};
   }else if(pointers.size===2){
