@@ -363,6 +363,17 @@ function ghRender(refit=true){
   const left=document.createElement('span');left.className='gh-port';
   const kind=document.createElement('span');kind.className='gh-node-type';kind.textContent=n.name||n.type||'Node';
   const right=document.createElement('span');right.className='gh-port';body.append(left,kind,right);
+  if(n.control){
+   const field=document.createElement('input');field.type='range';field.min=n.control.min;field.max=n.control.max;field.step=n.control.step||.1;field.value=n.control.value;
+   field.style.cssText='width:100%;margin-top:7px;accent-color:#277ca2';
+   const val=document.createElement('span');val.textContent=Number(n.control.value).toFixed(2)+(n.control.unit||'');val.style.cssText='font-size:11px;display:block;text-align:center';
+   const wrapper=document.createElement('div');wrapper.style.cssText='padding:0 8px 8px';wrapper.append(field,val);
+   field.addEventListener('pointerdown',e=>e.stopPropagation());
+   field.addEventListener('click',e=>e.stopPropagation());
+   field.addEventListener('input',e=>{e.stopPropagation();const v=Number(field.value);n.control.value=v;val.textContent=v.toFixed(2)+(n.control.unit||'');n.control.onChange(v)});
+   node.append(wrapper);
+  }
+
   node.append(head,body);
   node.onclick=e=>{if(ghTool==='select')ghSelect(n.guid,e.shiftKey||e.metaKey||e.ctrlKey);};
   host.append(node);
@@ -860,5 +871,141 @@ $('pyBuild').onclick=()=>{
   pyOutput('\n'+summary.join('\n')+'\n');
  }catch(err){$('pyState').textContent='Erreur reconstruction';pyOutput('\nReconstruction impossible : '+err.message+'\n')}
 };
+
+/* GAGA R1 · In-app Python → linked GH canvas + Three.js.
+   Scope: a verified GAGA V3D-04 source adapter, NOT execution of Rhino/.NET Python.
+   No server, no arbitrary code evaluation, no GH serialization. */
+const gagaR1Runtime={active:false,concepts:{},root:null};
+const gagaR1Signature=source=>
+ /def\s+build_roof_A\s*\(/.test(source)&&
+ /def\s+build_roof_B\s*\(/.test(source)&&
+ /def\s+build_gh_concept\s*\(/.test(source)&&
+ /def\s+generate_layout\s*\(/.test(source)&&
+ /GAGA.*V3D-04|V3D04/.test(source)&&
+ /A SHOW ROOF/.test(source)&&/B SHOW ROOF/.test(source);
+function gagaR1RoofMesh(name,a,b,c,d,color,alpha){
+ const pts=[...a,...b,...c,...a,...c,...d],geom=new T.BufferGeometry();
+ geom.setAttribute('position',new T.Float32BufferAttribute(pts,3));geom.computeVertexNormals();
+ const mat=new T.MeshStandardMaterial({color,side:T.DoubleSide,transparent:true,opacity:alpha,roughness:.6,depthWrite:false});
+ const m=new T.Mesh(geom,mat);m.name=name;return m;
+}
+function gagaR1SetRoof(key){
+ const ctx=gagaR1Runtime.concepts[key];
+ if(!ctx)return;
+ const group=ctx.roof;
+ while(group.children.length){const old=group.children[0];group.remove(old);old.geometry?.dispose();old.material?.dispose();}
+ const p=ctx.params,w=ctx.layout.c.w,l=ctx.layout.c.l,o=p.overhang,e=p.eave,r=p.ridge;
+ if(!(r>e&&e>ctx.layout.c.h))return;
+ const z0=-o,z1=l+o,x0=-o,x1=w+o,mid=w/2;
+ const elevation=x=>r-(r-e)*Math.abs(x-mid)/(mid+o);
+ const surface=(name,a,b,color,alpha)=>gagaR1RoofMesh(name,[a,elevation(a),z0],[b,elevation(b),z0],[b,elevation(b),z1],[a,elevation(a),z1],color,alpha);
+ if(key==='A'){
+  group.add(surface('ROOF A | VERSANT GAUCHE',x0,mid,0x75b7c4,.7));
+  group.add(surface('ROOF A | VERSANT DROIT',mid,x1,0x75b7c4,.7));
+ }else{
+  const glass=Math.max(.5,Math.min(p.glass,w-1)),xl=mid-glass/2,xr=mid+glass/2;
+  group.add(surface('ROOF B | OPAQUE GAUCHE',x0,xl,0xb49fa8,.8));
+  group.add(surface('ROOF B | VITRAGE GAUCHE',xl,mid,0x72cced,.46));
+  group.add(surface('ROOF B | VITRAGE DROIT',mid,xr,0x72cced,.46));
+  group.add(surface('ROOF B | OPAQUE DROIT',xr,x1,0xb49fa8,.8));
+ }
+}
+function gagaR1Build(){
+ const root=new T.Group();root.name='GAGA V3D-04 R1 · Adaptateur iPhone';
+ const nodes=[],links=[];
+ const palette=[
+  {A:-55,B:60},{A:450,B:4800}
+ ];
+ const addNode=(key,label,type,column,row,geo=null,control=null,visible=true)=>{
+  const guid='gaga-r1-'+key+'-'+label.replace(/[^A-Za-z0-9]+/g,'-');
+  const n={guid,name:type,nickname:label,type,x:20+column*235,y:(key==='A'?30:1720)+row*105,geometry:geo?[geo]:[],visible,control};
+  nodes.push(n);return n;
+ };
+ const wire=(from,to)=>links.push({from:from.guid,to:to.guid});
+ for(const key of ['A','B']){
+  const d=vgLayout(key);
+  const c=d.c;
+  const concept=new T.Group();concept.name='Concept '+key;concept.position.x=key==='A'?-55:60;
+  const shops=new T.Group();shops.name=key+' | 175 VOLUMES';
+  const categories={};
+  for(const [code,m] of Object.entries(vgModules)){
+   const cat=new T.Group();cat.name=key+' | '+code+' | '+m[0]+' COMMERCES';
+   for(const o of d.shops.filter(x=>x.code===code)){
+    cat.add(vgBox(o.r,c.h,m[3],o.id,{concept:key,code,surface:vgArea(o.r).toFixed(3)+' m²',units:'m'}));
+   }
+   categories[code]=cat;shops.add(cat);
+  }
+  concept.add(shops);
+  const services=new T.Group();services.name=key+' | SERVICES 85';
+  services.add(vgBox(d.service,.24,0x8ab5bf,'SERVICES 85',{status:'provisoire'},.85));
+  concept.add(services);
+  const paths=new T.Group();paths.name=key+' | CIRCULATIONS NON VALIDEES';
+  d.paths.forEach((r,i)=>paths.add(vgBox(r,.04,0xd9be83,'CIRCULATION '+(i+1),{status:'non validée'},.9)));
+  paths.visible=false;concept.add(paths);
+  const roof=new T.Group();roof.name=key+' | ROOF SURFACES';roof.visible=false;concept.add(roof);
+  root.add(concept);
+  const params=key==='A'?{eave:5.5,ridge:7.5,overhang:1,glass:0,x:0,y:0,rotation:0}:{eave:5,ridge:7,overhang:.8,glass:2.5,x:0,y:0,rotation:0};
+  const ctx={concept,layout:d,categories,services,paths,roof,params};gagaR1Runtime.concepts[key]=ctx;
+  gagaR1SetRoof(key);
+  const positionUpdate=()=>{concept.position.x=(key==='A'?-55:60)+params.x;concept.position.z=params.y;concept.rotation.y=-params.rotation*Math.PI/180;};
+  const param=(label,min,max,value,row,onChange,step=.1)=>{
+   const control={min,max,value,step,unit:'',onChange};const node=addNode(key,key+' '+label,'Number Slider',0,row,null,control);
+   return node;
+  };
+  const x=param('POSITION X',-200,200,0,0,v=>{params.x=v;positionUpdate()},1);
+  const y=param('POSITION Y',-200,200,0,1,v=>{params.y=v;positionUpdate()},1);
+  const rotation=param('ROTATION DEGRES',0,180,0,2,v=>{params.rotation=v;positionUpdate()},1);
+  const move=addNode(key,'MOVE / ROTATE','Transform',1,1,concept);
+  wire(x,move);wire(y,move);wire(rotation,move);
+  const groupNode=addNode(key,key+' COMMERCES 175','Geometry Group',2,0,shops);
+  wire(move,groupNode);
+  Object.entries(categories).forEach(([code,cat],i)=>{
+   const node=addNode(key,key+' SHOW '+code,'Boolean Toggle / Preview',3,i,cat);
+   wire(groupNode,node);
+  });
+  const source=addNode(key,key+' SERVICES 85','Curve / Preview',2,2,services);
+  wire(move,source);
+  const passages=addNode(key,key+' CIRCULATIONS (NON VALIDEES)','Preview',2,3,paths,null,false);
+  wire(move,passages);
+  const roofSlider=(label,min,max,field,row,step=.1)=>param(label,min,max,params[field],row,v=>{params[field]=v;gagaR1SetRoof(key)},step);
+  const eave=roofSlider('ROOF_EAVE_HEIGHT',4,6,'eave',11);
+  const ridge=roofSlider('ROOF_RIDGE_HEIGHT',6.5,10,'ridge',12);
+  const overhang=roofSlider('ROOF_OVERHANG',0,2,'overhang',13);
+  let glass=null;if(key==='B')glass=roofSlider('ROOF_GLASS_WIDTH',.5,4,'glass',14);
+  const roofBuild=addNode(key,'ROOF '+key+' | SURFACES','Loft / Surface Adapter',1,12);
+  wire(eave,roofBuild);wire(ridge,roofBuild);wire(overhang,roofBuild);if(glass)wire(glass,roofBuild);
+  const roofPreview=addNode(key,key+' SHOW ROOF','Boolean Toggle / Custom Preview',2,12,roof,null,false);
+  wire(roofBuild,roofPreview);
+ }
+ gagaR1Runtime.root=root;
+ return {root,nodes,links};
+}
+const gagaR1DefaultPyRun=$('pyRun').onclick;
+$('pyRun').onclick=async()=>{
+ const source=$('pyEditor').value;
+ if(!gagaR1Signature(source)){return gagaR1DefaultPyRun()}
+ if(pyRunning)return;
+ pyRunning=true;$('pyRun').disabled=true;
+ try{
+  // The original Rhino Python source is NOT executed: only the predefined R1
+  // geometric adapter is executed, using validated constants and structures.
+  const result=gagaR1Build();
+  load(result.root,false,'GAGA V3D-04 R1 · A + B');
+  ghSelection.clear();ghNodes=result.nodes;ghLinks=result.links;
+  $('pyWorkspace').hidden=true;
+  $('ghWorkspace').hidden=false;
+  $('ghTitle').textContent='GAGA V3D-04 R1 | GH LOCAL';
+  ghRender();
+  $('pyState').textContent='GH + 3D liés';
+  $('status').textContent='● GAGA R1 · MOTEUR LOCAL';
+  $('counts').textContent='350 commerces · A + B';
+  $('notice').textContent='Adaptateur V3D-04 R1 : non-exécution du Python Rhino original · 3D et nodes liés · DWG/conformité non validés.';
+  pyOutput('Adaptateur GAGA R1 exécuté localement. 350 volumes, toitures A/B, nodes associés. Aucun .gh natif créé.\n',true);
+  ghMessage('GAGA R1 : nodes liés à la 3D. Curseurs : glisser pour recalculer. Sélectionner un node puis Voir/Masquer/Isoler. Toitures OFF au départ.');
+ }catch(error){
+  $('pyState').textContent='Erreur adaptateur';pyOutput('GAGA R1 : '+String(error.message||error)+'\n',true);
+ }finally{pyRunning=false;$('pyRun').disabled=false}
+};
+
 pyBuildAvailability();
 </script></body></html>
