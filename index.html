@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1929"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GAGA 3D"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>GAGA 3D Viewer V1.7.1</title><style>
+<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1929"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="GAGA 3D"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><title>GAGA 3D Viewer V1.8.0</title><style>
 :root{color-scheme:dark;--bg:#08131f;--glass:rgba(13,28,43,.85);--stroke:rgba(164,211,235,.18);--accent:#77d8f3;--muted:#92abbb}
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:#edf8ff;font:14px -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}body{overscroll-behavior:none}
 main{height:100dvh;width:100%;position:relative;display:flex;flex-direction:column;gap:0;padding:0;background:#08131f}
@@ -92,12 +92,12 @@ footer{position:absolute;z-index:3;bottom:calc(env(safe-area-inset-bottom) + 13p
 #pyEditor{display:block;flex:1;min-height:120px;width:calc(100% - 24px);margin:0 12px 10px;resize:none;border:1px solid #53758b;border-radius:12px;background:#091826;color:#e6f6fd;padding:13px;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:4;outline:none;touch-action:pan-y;-webkit-overflow-scrolling:touch}
 #pyConsoleTitle{display:flex;justify-content:space-between;align-items:center;padding:0 13px 7px;font-size:11px;color:#a9c8d9}
 #pyConsole{height:24%;min-height:100px;max-height:35%;overflow:auto;margin:0 12px calc(env(safe-area-inset-bottom) + 12px);padding:12px;border:1px solid #415b6f;border-radius:11px;background:#07131e;color:#a8efd4;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
-</style></head><body><main><header><div><strong>GAGA <em>3D</em></strong> <small>V1.7.1</small><div><small>3D VIEWER · TOUCH EDITION</small></div></div><small id="status">● DÉMO</small></header><nav><button id="demo" class="on">Démo</button><button id="import">＋ Importer un fichier</button><button id="ghMode">⌘ GH</button><button id="pyMode">⌘ Python</button><button id="fit">⌖ Cadrer</button></nav><div class="viewport" id="viewport"><div class="floating label" id="modelName">MARCHÉ YASSAMINE — DÉMO</div><div class="floating tools"><button id="layers">▤</button><button id="section">◫</button><button id="reset">↺</button><button id="measure" title="Mesurer deux points" aria-pressed="false">📏</button></div><div class="floating views"><span></span><button data-view="top">TOP</button><span></span><button data-view="left">LEFT</button><button data-view="iso" class="on">3D</button><button data-view="right">RIGHT</button><span></span><button data-view="front">FACE</button></div><div class="floating hint">1 doigt : orbite · 2 doigts : zoom/pan</div><div class="panel" id="importPanel" hidden><div class="heading">IMPORT · FICHIERS<button class="close" data-close="importPanel">✕</button></div><p class="meta">Ouvrir un GH, GHX ou GLB depuis Fichiers. Si iOS grise ton GH, utilise le bouton ZIP de secours ci-dessous (compresse d’abord le GH dans Fichiers).</p><input id="file" type="file" aria-label="Choisir GH, GHX ou GLB"><button id="zipImport" type="button" style="width:100%;padding:13px;background:#245a73;border:1px solid #78c5eb;border-radius:12px;margin-bottom:9px">📦 Ouvrir un ZIP contenant le GH</button><input id="zipFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden><div id="dropZone" role="status" class="meta" style="border:1px dashed #6ba7c7;border-radius:11px;padding:12px;text-align:center">Ou glisse un fichier ici depuis Fichiers (iPad / ordinateur)</div><label class="layer"><span>Fichier renommé en .txt (le traiter comme .gh)</span><input type="checkbox" id="forceGh"></label><div class="meta" id="importDiagnostic" style="margin-top:12px">Sélecteur prêt. Sur iPhone : dans Fichiers, appui long sur le .gh → Compresser ; puis utilise « Ouvrir un ZIP contenant le GH ».</div><p class="meta" style="margin-top:12px">Lecture expérimentale des polylignes enregistrées dans les fichiers GH (sans calculer les composants Grasshopper). Les volumes absents du fichier ne seront pas inventés.</p></div><div class="panel" id="ghPanel" hidden><div class="heading">GRASSHOPPER · INSPECTION<button class="close" data-close="ghPanel">✕</button></div><div class="meta" id="ghSummary"></div><div id="ghTree" style="max-height:42dvh;overflow:auto;margin-top:12px"></div></div><div class="panel" id="layerPanel" hidden><div class="heading">VISIBILITY MANAGER<button class="close" data-close="layerPanel">✕</button></div><div id="layerList"></div></div><div id="measureHud" hidden role="status" aria-live="polite">
+</style></head><body><main><header><div><strong>GAGA <em>3D</em></strong> <small>V1.8.0</small><div><small>3D VIEWER · TOUCH EDITION</small></div></div><small id="status">● DÉMO</small></header><nav><button id="demo" class="on">Démo</button><button id="import">＋ Importer un fichier</button><button id="ghMode">⌘ GH</button><button id="pyMode">⌘ Python</button><button id="fit">⌖ Cadrer</button></nav><div class="viewport" id="viewport"><div class="floating label" id="modelName">MARCHÉ YASSAMINE — DÉMO</div><div class="floating tools"><button id="layers">▤</button><button id="section">◫</button><button id="reset">↺</button><button id="measure" title="Mesurer deux points" aria-pressed="false">📏</button></div><div class="floating views"><span></span><button data-view="top">TOP</button><span></span><button data-view="left">LEFT</button><button data-view="iso" class="on">3D</button><button data-view="right">RIGHT</button><span></span><button data-view="front">FACE</button></div><div class="floating hint">1 doigt : orbite · 2 doigts : zoom/pan</div><div class="panel" id="importPanel" hidden><div class="heading">IMPORT · FICHIERS<button class="close" data-close="importPanel">✕</button></div><p class="meta">Ouvrir un GH, GHX ou GLB depuis Fichiers. Si iOS grise ton GH, utilise le bouton ZIP de secours ci-dessous (compresse d’abord le GH dans Fichiers).</p><input id="file" type="file" aria-label="Choisir GH, GHX ou GLB"><button id="zipImport" type="button" style="width:100%;padding:13px;background:#245a73;border:1px solid #78c5eb;border-radius:12px;margin-bottom:9px">📦 Ouvrir un ZIP contenant le GH</button><input id="zipFile" type="file" accept=".zip,application/zip,application/x-zip-compressed" hidden><div id="dropZone" role="status" class="meta" style="border:1px dashed #6ba7c7;border-radius:11px;padding:12px;text-align:center">Ou glisse un fichier ici depuis Fichiers (iPad / ordinateur)</div><label class="layer"><span>Fichier renommé en .txt (le traiter comme .gh)</span><input type="checkbox" id="forceGh"></label><div class="meta" id="importDiagnostic" style="margin-top:12px">Sélecteur prêt. Sur iPhone : dans Fichiers, appui long sur le .gh → Compresser ; puis utilise « Ouvrir un ZIP contenant le GH ».</div><p class="meta" style="margin-top:12px">Lecture expérimentale des polylignes enregistrées dans les fichiers GH (sans calculer les composants Grasshopper). Les volumes absents du fichier ne seront pas inventés.</p></div><div class="panel" id="ghPanel" hidden><div class="heading">GRASSHOPPER · INSPECTION<button class="close" data-close="ghPanel">✕</button></div><div class="meta" id="ghSummary"></div><div id="ghTree" style="max-height:42dvh;overflow:auto;margin-top:12px"></div></div><div class="panel" id="layerPanel" hidden><div class="heading">VISIBILITY MANAGER<button class="close" data-close="layerPanel">✕</button></div><div id="layerList"></div></div><div id="measureHud" hidden role="status" aria-live="polite">
 <div class="measureHead"><strong>📏 MESURE A–B</strong><button id="measureClose" title="Quitter la mesure">✕</button></div>
 <div id="measureStatus">Touchez un sommet ou une courbe pour placer A.</div>
 <div id="measureResult" hidden><b id="measureLength"></b><div id="measureHorizontal"></div><div id="measureVertical"></div><div id="measureCoords"></div></div>
 <div class="measureActions"><button id="measureClear">↺ Recommencer</button><select id="measureUnit" aria-label="Unité de mesure"><option value="u">Unités modèle (inconnues)</option><option value="m">Coordonnées en mètres</option><option value="mm">Coordonnées en millimètres</option><option value="cm">Coordonnées en centimètres</option></select></div>
-</div><div class="panel" id="sectionPanel" hidden><div class="heading">COUPE HORIZONTALE<button class="close" data-close="sectionPanel">✕</button></div><label class="layer">Coupe active<input type="checkbox" id="clipEnabled"></label><input type="range" id="clipRange" min="0" max="100" value="60"><small id="clipLabel">60 %</small></div><div class="info" id="info" hidden><div class="heading"><span id="itemName">Objet</span><button class="close" id="closeInfo">✕</button></div><p class="meta" id="itemData"></p><nav><button id="isolate">Isoler</button><button id="showAll">Tout afficher</button></nav></div></div><section id="ghWorkspace" hidden aria-label="Grasshopper Canvas"><div id="ghBar"><button id="ghBack">‹ 3D</button><strong id="ghTitle">GRASSHOPPER CANVAS</strong><button id="ghMinus">−</button><button id="ghPlus">＋</button><button id="ghFit">⌖</button></div><div id="ghToolBar" role="toolbar" aria-label="Outils de sélection Grasshopper"><button data-gh-tool="select" class="active">↖ Sélection</button><button data-gh-tool="rectangle">▭ Rectangle</button><button data-gh-tool="pan">✋ Déplacer</button><button data-gh-tool="zoom">⌕ Zoom</button><button id="ghShowSelected">👁 Voir</button><button id="ghHideSelected">◉ Masquer</button><button id="ghIsolateSelected">◎ Isoler</button><button id="ghClearSelected">✕</button></div><div id="ghCanvasArea"><div id="ghSelectionBox" hidden></div><div id="ghWorld"><svg id="ghWires" width="4000" height="4000" viewBox="0 0 4000 4000" aria-hidden="true"></svg><div id="ghNodes"></div></div><div id="ghInfo">Importe un GHX pour afficher ses vrais composants et connexions. Les nodes binaires GH nécessitent un décodeur compatible.</div></div></section><section id="pyWorkspace" hidden aria-label="GAGA Python Studio"><div id="pyBar"><button id="pyBack" type="button">‹ 3D</button><strong>GAGA PYTHON 3 STUDIO</strong><button id="pyClear" type="button">Effacer console</button></div><div id="pyActions"><button id="pyImportButton" type="button">＋ Importer .py</button><input id="pyFile" type="file" accept=".py,text/x-python,text/plain" hidden><button id="pyRun" type="button">▶ Exécuter</button></div><div id="pyFileName">Nouveau script · Python 3 (Pyodide)</div><textarea id="pyEditor" aria-label="Éditeur de script Python 3" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off">import math
+</div><div class="panel" id="sectionPanel" hidden><div class="heading">COUPE HORIZONTALE<button class="close" data-close="sectionPanel">✕</button></div><label class="layer">Coupe active<input type="checkbox" id="clipEnabled"></label><input type="range" id="clipRange" min="0" max="100" value="60"><small id="clipLabel">60 %</small></div><div class="info" id="info" hidden><div class="heading"><span id="itemName">Objet</span><button class="close" id="closeInfo">✕</button></div><p class="meta" id="itemData"></p><nav><button id="isolate">Isoler</button><button id="showAll">Tout afficher</button></nav></div></div><section id="ghWorkspace" hidden aria-label="Grasshopper Canvas"><div id="ghBar"><button id="ghBack">‹ 3D</button><strong id="ghTitle">GRASSHOPPER CANVAS</strong><button id="ghMinus">−</button><button id="ghPlus">＋</button><button id="ghFit">⌖</button></div><div id="ghToolBar" role="toolbar" aria-label="Outils de sélection Grasshopper"><button data-gh-tool="select" class="active">↖ Sélection</button><button data-gh-tool="rectangle">▭ Rectangle</button><button data-gh-tool="pan">✋ Déplacer</button><button data-gh-tool="zoom">⌕ Zoom</button><button id="ghShowSelected">👁 Voir</button><button id="ghHideSelected">◉ Masquer</button><button id="ghIsolateSelected">◎ Isoler</button><button id="ghClearSelected">✕</button></div><div id="ghCanvasArea"><div id="ghSelectionBox" hidden></div><div id="ghWorld"><svg id="ghWires" width="4000" height="4000" viewBox="0 0 4000 4000" aria-hidden="true"></svg><div id="ghNodes"></div></div><div id="ghInfo">Importe un GHX pour afficher ses vrais composants et connexions. Les nodes binaires GH nécessitent un décodeur compatible.</div></div></section><section id="pyWorkspace" hidden aria-label="GAGA Python Studio"><div id="pyBar"><button id="pyBack" type="button">‹ 3D</button><strong>GAGA PYTHON 3 STUDIO</strong><button id="pyClear" type="button">Effacer console</button></div><div id="pyActions"><button id="pyImportButton" type="button">＋ Importer .py</button><input id="pyFile" type="file" accept=".py,text/x-python,text/plain" hidden><button id="pyRun" type="button">▶ Exécuter</button><button id="pyBuild" type="button" disabled>▣ Voir volumes 3D</button></div><div id="pyFileName">Nouveau script · Python 3 (Pyodide)</div><textarea id="pyEditor" aria-label="Éditeur de script Python 3" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off">import math
 
 radius = 5
 print("Surface :", math.pi * radius ** 2)</textarea><div id="pyConsoleTitle"><span>CONSOLE · Les bibliothèques Rhino / Grasshopper ne sont pas disponibles ici</span><span id="pyState">Prêt</span></div><pre id="pyConsole" role="status" aria-live="polite">Python se chargera à la première exécution (connexion nécessaire).</pre></section><footer><span id="counts">175 éléments de démo</span><span id="cameraLabel">Perspective</span></footer><div id="notice">Modèle fictif — aucun plan ni surface de projet réel. Import GLB local.</div></main><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script><script type="module">
@@ -762,7 +762,7 @@ const pyOutput=(value,clear=false)=>{const c=$('pyConsole');if(clear)c.textConte
 $('pyMode').onclick=()=>{if(!$('pyWorkspace').hidden){$('pyWorkspace').hidden=true;return}$('ghWorkspace').hidden=true;$('pyWorkspace').hidden=false;document.querySelectorAll('.panel').forEach(p=>p.hidden=true)};
 $('pyBack').onclick=()=>$('pyWorkspace').hidden=true;
 $('pyImportButton').onclick=()=>$('pyFile').click();
-$('pyFile').onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!/\.py$/i.test(file.name)){pyOutput('\\nErreur : choisis un fichier .py');return}if(file.size>1024*1024){pyOutput('\\nErreur : limite de 1 Mo pour l’éditeur mobile');return}try{$('pyEditor').value=await file.text();$('pyFileName').textContent=file.name+' · '+file.size+' octets';pyShowInspection($('pyEditor').value,file.name)||pyOutput('\nFichier importé : '+file.name)}catch(err){pyOutput('\\nErreur import : '+err.message)}};
+$('pyFile').onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!/\.py$/i.test(file.name)){pyOutput('\\nErreur : choisis un fichier .py');return}if(file.size>1024*1024){pyOutput('\\nErreur : limite de 1 Mo pour l’éditeur mobile');return}try{$('pyEditor').value=await file.text();$('pyFileName').textContent=file.name+' · '+file.size+' octets';pyShowInspection($('pyEditor').value,file.name)||pyOutput('\nFichier importé : '+file.name);pyBuildAvailability()}catch(err){pyOutput('\\nErreur import : '+err.message)}};
 $('pyClear').onclick=()=>$('pyConsole').textContent='';
 async function pyEnsureEngine(){
  if(pyEngine)return pyEngine;
@@ -786,4 +786,79 @@ $('pyRun').onclick=async()=>{
  }catch(err){pyOutput('Erreur Python : '+(err?.message||String(err))+'\n');$('pyState').textContent='Erreur'}
  finally{pyRunning=false;$('pyRun').disabled=false}
 };
+
+/* GAGA V3D-02 reader: fixed source-derived layouts, not arbitrary Python execution */
+const vgModules={P01:[120,2.5,2.4,0x65ad61],P02:[10,3,4,0x327fcd],P03:[10,4,5,0xea8b35],P04:[15,2.5,4,0xe4ba47],P05:[10,5,5,0x9163b7],P06:[3,3,4,0x3eada5],P07:[3,3,4,0xcd565a],P08:[2,5,5,0x8a969f],P09:[2,5,5,0xa9774f]};
+const vgPacks={
+ A:['55593322774444','5559332277444','55833322264444','55833322274444'],
+ B:['555593332226674444','55589333222774444','5558333322224444444']
+};
+// The strings above encode P01-P09 category digits in the exact row order
+// returned by the original Python pack_complementary algorithm.
+function vgSupported(src){return /GAGA AI DESIGN LAB\s*\|\s*05\.8\.2\s*\|\s*V3D-02/.test(src)&&/def generate_layout\s*\(/.test(src)&&/SURFACE_COMMERCES\s*=\s*1612(?:\.0)?\b/.test(src)&&/NB_TOTAL\s*=\s*175\b/.test(src)}
+function pyBuildAvailability(){$('pyBuild').disabled=!vgSupported($('pyEditor').value)}
+$('pyEditor').addEventListener('input',pyBuildAvailability);
+function vgRect(x,y,w,h){if(w<=0||h<=0)throw Error('Rectangle invalide');return [x,y,x+w,y+h]}
+function vgArea(r){return (r[2]-r[0])*(r[3]-r[1])}
+function vgLayout(key){
+ const c=key==='A'?{w:40,l:58,h:3.2,fl:[20,20,20,20,20,20]}:{w:32,l:72.5,h:3.5,fl:[24,24,24,24,24]};
+ const t=(c.w+c.l-Math.sqrt((c.w+c.l)**2-800))/4,wi=c.w-2*t;
+ const service=vgRect(t,t,wi,85/wi),cross=vgRect(t,service[3],wi,2),y0=cross[3],y1=c.l-t;
+ const rows=[...c.fl.map(n=>Array(n).fill('P01')),...vgPacks[key].map(seq=>[...seq].map(x=>'P0'+x))];
+ const depths=rows.map(row=>Math.max(...row.map(code=>vgModules[code][2])));
+ const n=rows.length/2+1,free=wi-depths.reduce((a,b)=>a+b,0);
+ const widths=key==='A'?Array(n).fill(free/n):Array(n).fill((free-2.1)/(n-1));
+ if(key==='B')widths[Math.floor(n/2)]=2.1;
+ const shops=[],paths=[cross],resid=[];let x=t,idx=0;
+ for(let j=0;j<rows.length;j++){
+  if(j%2===0){paths.push(vgRect(x,y0,widths[j/2],y1-y0));x+=widths[j/2]}
+  const depth=depths[j],x0=x,x1=x+depth,left=j%2===0;let y=y0;
+  for(const code of rows[j]){
+   const m=vgModules[code],sx=left?x0:x1-m[2],r=vgRect(sx,y,m[2],m[1]);
+   if(r[3]>y1+1e-6)throw Error('Cellule hors enveloppe');
+   if(m[2]<depth-1e-6)resid.push(vgRect(left?sx+m[2]:x0,y,depth-m[2],m[1]));
+   shops.push({code,r,id:key+'-'+code+'-'+String(++idx).padStart(3,'0')});y+=m[1];
+  }
+  if(y<y1-1e-6)resid.push(vgRect(x0,y,depth,y1-y));x=x1;
+ }
+ paths.push(vgRect(x,y0,widths[n-1],y1-y0));
+ const commercial=shops.reduce((v,a)=>v+vgArea(a.r),0),circulation=paths.reduce((v,r)=>v+vgArea(r),0),remaining=resid.reduce((v,r)=>v+vgArea(r),0);
+ if(Math.abs(x+widths[n-1]-(c.w-t))>1e-5||shops.length!==175||Math.abs(commercial-1612)>1e-5||Math.abs(circulation+remaining-423)>1e-5)throw Error('Échec validation des surfaces / volumes');
+ for(const [code,m] of Object.entries(vgModules))if(shops.filter(a=>a.code===code).length!==m[0])throw Error('Nombre incorrect : '+code);
+ return {c,shops,service,paths,resid,circulation,remaining,minWidth:Math.min(...widths)};
+}
+function vgBox(r,h,color,name,metadata,opacity=1){
+ const mesh=new T.Mesh(new T.BoxGeometry(r[2]-r[0],h,r[3]-r[1]),new T.MeshStandardMaterial({color,roughness:.85,transparent:opacity<1,opacity,depthWrite:opacity===1}));
+ mesh.position.set((r[0]+r[2])/2,h/2,(r[1]+r[3])/2);mesh.name=name;mesh.userData=metadata;return mesh;
+}
+$('pyBuild').onclick=()=>{
+ if(!vgSupported($('pyEditor').value))return;
+ try{
+  const root=new T.Group();root.name='GAGA V3D-02 · Reconstruction';
+  const summary=[];
+  for(const key of ['A','B']){
+   const d=vgLayout(key),group=new T.Group();group.name='Concept '+key+(key==='A'?' · HALLE CLIMATIQUE':' · RUE MARCHANDE');
+   group.position.x=key==='A'?-57:18;
+   const commercial=new T.Group();commercial.name='Commerces 175';
+   for(const [code,m] of Object.entries(vgModules)){
+    const category=new T.Group();category.name=code+' · '+m[0]+' commerces';
+    d.shops.filter(o=>o.code===code).forEach(o=>category.add(vgBox(o.r,d.c.h,m[3],o.id,{concept:key,code,surface:vgArea(o.r).toFixed(2)+' m²',hauteur:d.c.h+' m'})));
+    commercial.add(category);
+   }
+   group.add(commercial);
+   const services=new T.Group();services.name='Services provisoires 85 m²';services.add(vgBox(d.service,.3,0x8bbfc7,'Services',{statut:'Provisoire'},.8));group.add(services);
+   const paths=new T.Group();paths.name='Circulations provisoires';
+   d.paths.forEach((r,i)=>paths.add(vgBox(r,.045,0xd8c38d,'Passage '+(i+1),{surface:vgArea(r).toFixed(3)+' m²',statut:'Non validé'},.8)));group.add(paths);
+   const residual=new T.Group();residual.name='Résiduel non affecté';
+   d.resid.forEach((r,i)=>residual.add(vgBox(r,.025,0x65717b,'Résiduel '+(i+1),{surface:vgArea(r).toFixed(3)+' m²'},.45)));group.add(residual);
+   root.add(group);summary.push(key+' : 175 commerces · circulation '+d.circulation.toFixed(2)+' m² · résiduel '+d.remaining.toFixed(2)+' m² · largeur minimum '+d.minWidth.toFixed(2)+' m');
+  }
+  load(root,false,'GAGA V3D-02 — A + B');
+  $('pyWorkspace').hidden=true;$('status').textContent='● V3D-02 LOCAL';$('counts').textContent='350 commerces · A + B';
+  $('notice').textContent='Prototype local non implanté sur DWG. Circulations et conformité non validées.';
+  $('pyState').textContent='3D reconstruite';
+  pyOutput('\n'+summary.join('\n')+'\n');
+ }catch(err){$('pyState').textContent='Erreur reconstruction';pyOutput('\nReconstruction impossible : '+err.message+'\n')}
+};
+pyBuildAvailability();
 </script></body></html>
