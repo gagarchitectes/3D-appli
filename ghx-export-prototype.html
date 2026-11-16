@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101b2c">
+<title>GAGA — Export GHX iPhone · Prototype</title>
+<style>
+:root{color-scheme:dark;--bg:#091523;--fg:#eaf6ff;--accent:#6bcae8;--card:#172b3e;--line:#466476}
+*{box-sizing:border-box}body{margin:0;padding:16px 16px 40px;max-width:850px;margin-inline:auto;font:14px/1.5 -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+h1{font-size:21px;margin:4px 0}p{color:#c3dce8}code{color:#a9e8f6}
+.card{padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--card);margin:12px 0}label{display:block;margin-bottom:5px;color:#c8e2ef}input,textarea{font:inherit;background:#091d2d;color:var(--fg);border:1px solid #5d8397;border-radius:10px;padding:12px;width:100%}
+button{font:inherit;min-height:44px;border:1px solid #70bad5;border-radius:11px;padding:11px 13px;background:#225a77;color:#fff;cursor:pointer}
+button:disabled{opacity:.45}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions>*{flex:1}
+.nodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:center;margin:14px 0}.node{background:#b5c6bd;color:#152f2e;border-radius:12px;padding:10px;min-height:75px;text-align:center;border:2px solid #83b3a7;font-size:12px}
+.connector{font-size:23px;color:#95d3e8;text-align:center}
+pre{background:#071420;padding:11px;border-radius:12px;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:240px}
+.warning{border-left:3px solid #e8a552;padding-left:12px;color:#f0dbbe}
+small{color:#a8c4d5}
+</style>
+</head><body>
+<header><small>GAGA 3D VIEWER / DEVELOPMENT LAB</small><h1>Export GHX sur iPhone — V0</h1></header>
+<p>Prototype autonome : crée une définition expérimentale au format XML GH_IO depuis Safari, sans Rhino ni PC. C'est un <strong>test de sérialisation</strong>, pas encore une conversion universelle Python → Grasshopper.</p>
+<div class="card">
+<label for="script">Script Python (facultatif)</label>
+<input id="script" type="file" accept=".py,text/x-python,text/plain">
+<p id="fileState">Aucun script chargé. Le mini-graphe de démonstration reste utilisable.</p>
+<label for="a">Valeur A</label><input id="a" type="number" step=".5" value="4">
+<label for="b">Valeur B</label><input id="b" type="number" step=".5" value="6">
+<div class="nodes" aria-label="Graphe de démonstration">
+<div class="node">Number A<br><b id="va">4</b></div>
+<div class="connector">→</div>
+<div class="node">Addition<br><b id="sum">10</b></div>
+<div class="node">Number B<br><b id="vb">6</b></div>
+<div class="connector">↗</div>
+<div class="node">Result<br><b id="result">10</b></div>
+</div>
+<div class="actions"><button id="exportGhX">Enregistrer .ghx</button><button id="exportJson">Enregistrer JSON</button></div>
+</div>
+<div class="card">
+<strong>Contrôles locaux</strong>
+<pre id="diagnostics">Prêt.</pre>
+</div>
+<p class="warning"><strong>Compatibilité non certifiée :</strong> ce fichier GHX est un candidat de sérialisation. Les GUID de composants, le format des paramètres et le chargement dans Grasshopper devront être vérifiés sur une définition de référence. Le fichier peut être rejeté par Grasshopper. Aucun vrai fichier .gh binaire n'est généré ici.</p>
+<script>
+const $=id=>document.getElementById(id);
+const records=[
+ {id:'a',nickname:'GAGA VALUE A',name:'Number',kind:'parameter',x:40,y:80},
+ {id:'b',nickname:'GAGA VALUE B',name:'Number',kind:'parameter',x:40,y:215},
+ {id:'sum',nickname:'GAGA ADDITION',name:'Addition',kind:'component',x:340,y:130},
+ {id:'out',nickname:'GAGA RESULT',name:'Number',kind:'parameter',x:620,y:130}
+];
+const links=[{from:'a',to:'sum',targetPort:0},{from:'b',to:'sum',targetPort:1},{from:'sum',to:'out',targetPort:0}];
+function stableGuid(input){let s=0x811c9dc5;const bytes=[];for(const c of input){s=Math.imul(s^c.charCodeAt(0),0x01000193)>>>0}for(let i=0;i<16;i++){s=Math.imul(s^((i+17)*37),0x01000193)>>>0;bytes.push(s&255)}bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;const h=bytes.map(x=>x.toString(16).padStart(2,'0')).join('');return '{'+h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20)+'}'}
+const ids=Object.fromEntries(records.map(r=>[r.id,stableGuid('gaga.ghx.prototype.'+r.id)]));
+function escapeXml(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;')}
+const item=(name,type,code,value)=>'<item name="'+name+'" type_name="'+type+'" type_code="'+code+'">'+escapeXml(value)+'</item>';
+function chunk(name,index,items=[],chunks=[]){
+ return '<chunk name="'+escapeXml(name)+'"'+(index===null?'':' index="'+index+'"')+'><items count="'+items.length+'">'+items.join('')+'</items><chunks count="'+chunks.length+'">'+chunks.join('')+'</chunks></chunk>';
+}
+const str=(k,v)=>item(k,'gh_string',10,v),guid=(k,v)=>item(k,'gh_guid',9,v),int=(k,v)=>item(k,'gh_int32',3,v);
+const float=(k,v)=>item(k,'gh_double',7,v);
+function readValues(){const a=Number($('a').value),b=Number($('b').value);if(!Number.isFinite(a)||!Number.isFinite(b))throw Error('Valeurs numériques invalides');return {a,b,sum:a+b}}
+function draw(){try{const v=readValues();$('va').textContent=v.a;$('vb').textContent=v.b;$('sum').textContent=v.sum;$('result').textContent=v.sum}catch(e){$('diagnostics').textContent=e.message}}
+$('a').addEventListener('input',draw);$('b').addEventListener('input',draw);
+$('script').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!/\.py$/i.test(file.name)){ $('fileState').textContent='Sélectionne un .py';return }
+ const content=await file.text();$('fileState').textContent=file.name+' ('+content.length+' caractères). Conservé uniquement dans cet onglet ; non exécuté et non converti par V0.';};
+function buildGhX(){
+ const v=readValues();
+ // GH_IO-like archive structure, intentionally experimental until validated
+ // against an official Grasshopper-saved GHX fixture.
+ const objects=records.map((n,i)=>{
+  const inputLinks=links.filter(l=>l.to===n.id);
+  const sources=inputLinks.map((l,j)=>chunk('Input',j,[guid('Source',ids[l.from]),int('InputIndex',l.targetPort||0)]));
+  const attrs=chunk('Attributes',null,[item('Pivot','gh_pointf',31,n.x+','+n.y)]);
+  const container=chunk('Container',null,[
+   guid('InstanceGuid',ids[n.id]),str('Name',n.name),str('NickName',n.nickname),
+   str('Description','GAGA GHX V0: experimental node'),str('GAGA_Kind',n.kind),
+   float('GAGA_Value',n.id==='a'?v.a:n.id==='b'?v.b:v.sum)
+  ],[attrs,...sources]);
+  // Component assembly GUID requires verification; do not claim native GH compatibility.
+  return chunk('Object',i,[guid('GUID',stableGuid('gaga.prototype.type.'+n.name))],[container]);
+ });
+ const definition=chunk('Definition',null,[str('Name','GAGA GHX V0 · Experimental'),str('Description','Prototype non valide dans Grasshopper')],[
+  chunk('DocumentHeader',null,[str('DocumentID',stableGuid('gaga.document.prototype'))]),
+  chunk('DefinitionObjects',null,[],objects)
+ ]);
+ return '<?xml version="1.0" encoding="utf-8"?>\n<Archive name="Root"><items count="1">'+item('ArchiveVersion','gh_version',80,'1.0.0007')+'</items><chunks count="1">'+definition+'</chunks></Archive>';
+}
+function validateXml(xml){const doc=new DOMParser().parseFromString(xml,'application/xml');if(doc.querySelector('parsererror'))throw Error('XML invalide');const obj=doc.querySelectorAll('chunk[name="Object"]');if(obj.length!==4)throw Error('Nombre de nodes incorrect');return {objects:obj.length,links:links.length,bytes:new TextEncoder().encode(xml).byteLength}}
+function download(content,filename,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),15000)}
+$('exportGhX').onclick=()=>{try{const xml=buildGhX(),check=validateXml(xml);download(xml,'GAGA_GHX_PROTOTYPE_UNVERIFIED.ghx','application/xml');$('diagnostics').textContent='Fichier GHX expérimental généré sur cet appareil.\nXML valide : oui\nNodes représentés : '+check.objects+'\nLiens représentés : '+check.links+'\nTaille : '+check.bytes+' octets\nCompatibilité Rhino/Grasshopper : NON TESTÉE.'}catch(e){$('diagnostics').textContent='Erreur : '+e.message}};
+$('exportJson').onclick=()=>{const values=readValues();download(JSON.stringify({schema:'gaga-graph/v0',nodes:records.map(n=>({...n,guid:ids[n.id]})),links,values},null,2),'GAGA_GRAPH_REFERENCE.json','application/json');$('diagnostics').textContent='Référence JSON du graphe sauvegardée.'};
+draw();
+</script></body></html>
